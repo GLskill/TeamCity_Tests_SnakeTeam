@@ -5,7 +5,6 @@ pydantic
 faker
 rstr
 ruff
-pytest-playwright
 pytest-xdist
 softest
 uuid
