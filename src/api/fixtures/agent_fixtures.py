@@ -29,4 +29,11 @@ def authorized_agent(api_manager: ApiManager) -> AgentResponse:
         "Нет авторизованных агентов в окружении. "
         "Авторизуйте агента в TeamCity перед запуском тестов."
     )
-    return agents.agent[0]
+    agent: AgentResponse = agents.agent[0]
+
+    api_manager.agent_steps.enable_agent(agent)
+    yield agent
+    try:
+        api_manager.agent_steps.disable_agent(agent)
+    except Exception:
+        pass

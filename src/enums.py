@@ -67,4 +67,5 @@ class UiAlert(StrEnum):
     CHANGES = 'Changes'
     ADMINISTRATION = 'Administration'
     AGENTS_OVERVIEW = 'Overview'
+    AGENTS_FAVORITE_POOLS = 'Favorite Agent Pools'
     QUEUE = 'Builds in queue'
