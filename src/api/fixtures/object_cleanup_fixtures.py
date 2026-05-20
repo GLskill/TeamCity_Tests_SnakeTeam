@@ -45,12 +45,15 @@ def cleanup_objects(objects: List[Any]):    # Важно: порядок уда�
             except Exception:
                 pass
 
-    for obj in objects:   # 5) Agents
+    for obj in objects:   # 5) Agents — выключаем (enable_agent добавляет в created_objects)
         if isinstance(obj, AgentResponse):
             try:
                 api_manager.agent_steps.disable_agent(obj)
             except Exception:
                 pass
+            # Деавторизацию не делаем здесь намеренно:
+            # authorized_agent фикстура сама управляет авторизацией через yield-teardown.
+            # Если деавторизовывать здесь — будет двойной вызов и возможная ошибка 404.
 
     known_types = (VcsRootResponse, BuildTypeResponse, ProjectResponse, UserResponse, AgentResponse)
     for obj in objects:   # 6) Неизвестные типы

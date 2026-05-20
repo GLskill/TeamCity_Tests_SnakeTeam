@@ -1,3 +1,5 @@
+import time
+
 from src.enums import BuildState, BuildStatus
 from src.api.models.comparison.model_assertions import ModelAssertions
 from src.api.models.requests import QueueBuildRequest, BuildCancelRequest, CreateBuildTypeRequest, CopyBuildTypeRequest
@@ -129,8 +131,22 @@ class BuildSteps(BaseSteps):
         assert build_cancel_response.canceledInfo.text == build_queued_cancel_request.comment
         return build_cancel_response
 
+    def wait_for_running(self, build_id: int, timeout: int = 30, interval: float = 1.0) -> QueueBuildResponse:
+        deadline = time.time() + timeout
+        while time.time() < deadline:
+            build = self.get_queued_build_by_id(build_id)
+            if build.state == BuildState.RUNNING:
+                return build
+            time.sleep(interval)
+        raise TimeoutError(
+            f"Билд {build_id} не перешёл в state=running за {timeout}с. "
+            f"Последнее состояние: {build.state}"
+        )
+
     def cancel_running_build(self, build_queued_cancel_request: BuildCancelRequest, locator: str | int) \
             -> QueueBuildResponse:
+        self.wait_for_running(int(locator))
+
         build_cancel_response: QueueBuildResponse = ValidatedCrudRequester(
             RequestSpecs.admin_base_headers(),
             Endpoint.CANCEL_RUNNING_BUILD,
