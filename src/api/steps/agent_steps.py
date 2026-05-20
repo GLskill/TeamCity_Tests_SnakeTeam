@@ -25,6 +25,15 @@ class AgentSteps(BaseSteps):
 
         return agents
 
+    def get_unauthorized_agents(self) -> AgentsListResponse:
+        agents: AgentsListResponse = ValidatedCrudRequester(
+            RequestSpecs.admin_base_headers(),
+            Endpoint.GET_LIST_AGENTS,
+            ResponseSpecs.request_return_ok(),
+        ).get(params={'locator': 'authorized:false'})
+
+        return agents
+
     def get_agent_by_id(self, locator: int):
         agent: AgentResponse = ValidatedCrudRequester(
             RequestSpecs.admin_base_headers(),
@@ -48,6 +57,22 @@ class AgentSteps(BaseSteps):
             Endpoint.GET_AGENT,
             ResponseSpecs.request_return_ok(),
         ).put(locator=f'id:{agent_response.id}/enabled', body='false')
+
+    def authorize_agent(self, agent_response: AgentResponse) -> None:
+        """Авторизует агента. После теста нужно вызвать deauthorize_agent."""
+        ValidatedCrudRequester(
+            RequestSpecs.admin_base_headers(),
+            Endpoint.GET_AGENT,
+            ResponseSpecs.request_return_ok(),
+        ).put(locator=f'id:{agent_response.id}/authorized', body='true')
+
+    def deauthorize_agent(self, agent_response: AgentResponse) -> None:
+        """Снимает авторизацию агента — возвращает окружение в исходное состояние."""
+        ValidatedCrudRequester(
+            RequestSpecs.admin_base_headers(),
+            Endpoint.GET_AGENT,
+            ResponseSpecs.request_return_ok(),
+        ).put(locator=f'id:{agent_response.id}/authorized', body='false')
 
     def get_authorized_agents(self) -> AgentsListResponse:
         agents: AgentsListResponse = ValidatedCrudRequester(

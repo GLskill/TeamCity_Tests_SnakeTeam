@@ -4,16 +4,16 @@ import pytest
 from src.api.classes.api_manager import ApiManager
 from src.enums import BuildParams
 from src.api.models.requests import BuildCancelRequest, QueueBuildRequest
-from src.api.models.responses import QueueBuildResponse
+from src.api.models.responses import QueueBuildResponse, AgentResponse
 
 
 @pytest.mark.integraion
 @pytest.mark.builds
 @pytest.mark.api
 class TestBuildIntegration:
+
     @allure.id("8")
     @allure.title("Отмена билда в очереди (queued)")
-    @pytest.mark.usefixtures('queue_build', 'api_manager', 'queued_build_cancel_request')
     def test_cancel_queued_build(
             self,
             api_manager: ApiManager,
@@ -28,10 +28,10 @@ class TestBuildIntegration:
 
     @allure.id("9")
     @allure.title("Отмена запущенного билда (running)")
-    @pytest.mark.usefixtures('enable_agent', 'api_manager', 'queue_build', 'running_build_cancel_request')
     def test_cancel_running_build(
             self,
             api_manager: ApiManager,
+            authorized_agent: AgentResponse,
             queue_build: QueueBuildResponse,
             running_build_cancel_request: BuildCancelRequest
     ):
@@ -58,12 +58,11 @@ class TestBuildIntegration:
 
     @allure.id("10")
     @allure.title("Запуск custom build (параметры, ветка, агент)")
-    @pytest.mark.usefixtures('enable_agent', 'api_manager', 'custom_build_request')
     def test_start_custom_build(
             self,
             api_manager: ApiManager,
+            authorized_agent: AgentResponse,
             custom_build_request: QueueBuildRequest,
-            enable_agent
     ):
         response = api_manager.build_steps.add_build_to_queue(custom_build_request)
         get_build = api_manager.build_steps.get_queued_build_by_id(response.id)

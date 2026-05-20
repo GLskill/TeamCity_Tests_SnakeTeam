@@ -20,3 +20,20 @@ def enable_agent(get_disable_agent: AgentResponse, api_manager: ApiManager) -> N
 def get_enable_agent(api_manager, enable_agent) -> AgentResponse:
     agents = api_manager.agent_steps.get_enabled_agents()
     return agents.agent[0]
+
+
+@pytest.fixture()
+def authorized_agent(api_manager: ApiManager) -> AgentResponse:
+    agents = api_manager.agent_steps.get_authorized_agents()
+    assert agents.agent, (
+        "Нет авторизованных агентов в окружении. "
+        "Авторизуйте агента в TeamCity перед запуском тестов."
+    )
+    agent: AgentResponse = agents.agent[0]
+
+    api_manager.agent_steps.enable_agent(agent)
+    yield agent
+    try:
+        api_manager.agent_steps.disable_agent(agent)
+    except Exception:
+        pass
