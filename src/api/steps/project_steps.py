@@ -39,6 +39,11 @@ class ProjectSteps(BaseSteps):
         assert project.id == project_id
         return project
 
+    def get_project_by_id_and_track(self, project_id: str) -> ProjectResponse:
+        project = self.get_project_by_id(project_id)
+        self.created_objects.append(project)
+        return project
+
     def create_project(self, create_project_request: CreateProjectRequest) -> ProjectResponse:
         project: ProjectResponse = ValidatedCrudRequester(
             RequestSpecs.admin_base_headers(),

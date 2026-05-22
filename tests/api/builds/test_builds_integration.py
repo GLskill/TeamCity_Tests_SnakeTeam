@@ -7,7 +7,7 @@ from src.api.models.requests import BuildCancelRequest, QueueBuildRequest
 from src.api.models.responses import QueueBuildResponse, AgentResponse
 
 
-@pytest.mark.integraion
+@pytest.mark.integration
 @pytest.mark.builds
 @pytest.mark.api
 class TestBuildIntegration:

@@ -29,11 +29,11 @@ class ProjectPanel(BasePage):
     def admin_create_project_main_button(self):
         return self.page.locator('[data-test="ring-tooltip"][data-test-title="Create"] a')
 
-    @property  # Кнопка #3 - акутивно только когда есть проект в сисетеме, открывает дропдаун лист
+    @property  # Кнопка #3 - открывает дропдаун (только в overview-header, не в subproject)
     def admin_create_project_dropdown_button(self):
-        return self.page.locator('[data-hint-container-id="project-create-entity"]')
+        return self.page.locator('[data-test="overview-header"] [data-hint-container-id="project-create-entity"]')
 
-    @property  # Пункт "New project" внутри дропдауна кнопки #3
+    @property  # Пункт "New project" внутри дропдауна
     def admin_create_project_with_dropdown_button(self):
         return self.page.locator('[data-test="ring-list-item-label"]', has_text="New project")
 
@@ -41,25 +41,24 @@ class ProjectPanel(BasePage):
     def create_new_project_page(self):
         return self.page.locator("h1.PageTitle-module__title--gU")
 
-    def check_new_project_create_page(self):
-        with allure.step("Проверить наличее текста 'New Project' "):
-            expect(self.create_new_project_page).to_be_visible()
-            expect(self.create_new_project_page).to_have_text(UiAlert.NEW_PROJECT_TEXT)
-
     def check_welcome_or_favorite(self):
         with allure.step("Проверить что мы на странице проектов"):
             expect(self.project_wellcome_text.or_(self.favorite_projects_text)).to_be_visible()
         return self
 
+    def go_to_create_project(self):
+        from src.ui.pages.сreate_project_page import CreateProjectPage
+        return CreateProjectPage(self.page)
+
     def click_create_project_wellcome_button(self):
         self.admin_create_project_wellcome_button.click()
-        return self
+        return self.go_to_create_project()
 
     def click_create_project_main_button(self):
         self.admin_create_project_main_button.click()
-        return self
+        return self.go_to_create_project()
 
     def click_create_project_dropdown_button(self):
         self.admin_create_project_dropdown_button.click()
         self.admin_create_project_with_dropdown_button.click()
-        return self
+        return self.go_to_create_project()
