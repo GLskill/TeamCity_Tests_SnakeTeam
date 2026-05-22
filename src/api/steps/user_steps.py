@@ -81,6 +81,13 @@ class AdminUserSteps(BaseSteps):
             response_spec=ResponseSpecs.entity_was_not_found(),
         ).get(locator=f'id:{user_id}')
 
+    def admin_get_deleted_user_by_username(self, username: str) -> None:
+        CrudRequester(
+            request_spec=RequestSpecs.admin_base_headers(),
+            endpoint=Endpoint.GET_USER,
+            response_spec=ResponseSpecs.entity_was_not_found(),
+        ).get(locator=f'username:{username}')
+
     def admin_get_user_groups(self, user_id: int) -> list:
         groups: GroupsListResponse = ValidatedCrudRequester(
             RequestSpecs.admin_base_headers(),

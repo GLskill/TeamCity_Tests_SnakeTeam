@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from playwright.sync_api import BrowserContext, Page
 
 from src.api.configs.config import Config
+from src.api.generators.random_data import RandomData
+from src.ui.pages.administration_page import AdminPanel
 
 load_dotenv(dotenv_path=Path(__file__).parents[3] / ".env", override=True)
 
@@ -25,6 +27,14 @@ def admin_username() -> str:
 @pytest.fixture()
 def admin_password() -> str:
     return os.getenv("TC_ADMIN_PASSWORD")
+
+
+@pytest.fixture
+def user_credentials():
+    return {
+        "username": RandomData.get_name().lower(),
+        "password": RandomData.get_password()
+    }
 
 
 def _get_session_cookie(username: str, password: str) -> list[dict]:
@@ -63,7 +73,8 @@ def auth_as_admin_web(context: BrowserContext, admin_username, admin_password) -
 
 
 @pytest.fixture()
-def auth_as_admin_web_with_project(context: BrowserContext, admin_username, admin_password, api_manager, target_project) -> Page:
+def auth_as_admin_web_with_project(context: BrowserContext, admin_username, admin_password, api_manager,
+                                   target_project) -> Page:
     context.add_cookies(_get_session_cookie(admin_username, admin_password))
     page = context.new_page()
     page.set_viewport_size({"width": 1920, "height": 1080})
@@ -73,3 +84,15 @@ def auth_as_admin_web_with_project(context: BrowserContext, admin_username, admi
     yield page
 
     page.close()
+
+
+@pytest.fixture
+def auth_as_admin_and_open_user_page(auth_as_admin_web):
+    return (
+        AdminPanel(auth_as_admin_web)
+        .open()
+        .click_switch_to_users()
+        .check_users_page_opened()
+        .click_create_user()
+        .check_create_user_page_opened()
+    )
