@@ -15,37 +15,41 @@ def created_objects():
 
 
 def cleanup_objects(objects: List[Any]):    # Важно: порядок удаления имеет значение.
+    snapshot = list(objects)  # копия списка, чтобы delete_project не ломал итерацию
+    print(f"\n[CLEANUP] objects to clean: {snapshot}")
     api_manager = ApiManager(objects)
 
-    for obj in objects:   # 1) VCS Roots
+    for obj in snapshot:   # 1) VCS Roots
         if isinstance(obj, VcsRootResponse):
             try:
                 api_manager.vcsroot_steps.delete_vcs_root(obj.id)
             except Exception:
                 pass
 
-    for obj in objects:  # 2) BuildTypes
+    for obj in snapshot:  # 2) BuildTypes
         if isinstance(obj, BuildTypeResponse):
             try:
                 api_manager.build_steps.delete_build_type(obj.id)
             except Exception:
                 pass
 
-    for obj in objects:   # 3) Projects
+    for obj in snapshot:   # 3) Projects
         if isinstance(obj, ProjectResponse):
             try:
+                print(f"[CLEANUP] Deleting project: {obj.id}")
                 api_manager.project_steps.delete_project(obj.id)
-            except Exception:
-                pass
+                print(f"[CLEANUP] Deleted OK: {obj.id}")
+            except Exception as e:
+                logging.warning(f"[CLEANUP] Failed to delete project {obj.id}: {e}")
 
-    for obj in objects:   # 4) Users
+    for obj in snapshot:   # 4) Users
         if isinstance(obj, UserResponse):
             try:
                 api_manager.user_steps.admin_delete_user(obj.id)
             except Exception:
                 pass
 
-    for obj in objects:   # 5) Agents — выключаем (enable_agent добавляет в created_objects)
+    for obj in snapshot:   # 5) Agents — выключаем (enable_agent добавляет в created_objects)
         if isinstance(obj, AgentResponse):
             try:
                 api_manager.agent_steps.disable_agent(obj)
@@ -56,6 +60,6 @@ def cleanup_objects(objects: List[Any]):    # Важно: порядок уда�
             # Если деавторизовывать здесь — будет двойной вызов и возможная ошибка 404.
 
     known_types = (VcsRootResponse, BuildTypeResponse, ProjectResponse, UserResponse, AgentResponse)
-    for obj in objects:   # 6) Неизвестные типы
+    for obj in snapshot:   # 6) Неизвестные типы
         if not isinstance(obj, known_types):
             logging.warning(f'Cleanup is not implemented for object type: {type(obj)}')
