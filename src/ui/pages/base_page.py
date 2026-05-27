@@ -1,7 +1,7 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TypeVar, Type
-
+from playwright.sync_api import Error as PlaywrightError
 from playwright.sync_api import Page
 from src.api.configs.config import Config
 from src.ui.elements.page_elements import PageElements
@@ -84,7 +84,13 @@ class BasePage(ABC):
         target = self.url()
         if self.base_url and target.startswith('/'):
             target = f'{self.base_url}{target}'
-        self.page.goto(target, wait_until="domcontentloaded")
+        try:
+            self.page.goto(target, wait_until="domcontentloaded")
+        except PlaywrightError as e:
+            if "interrupted by another navigation" in str(e):
+                self.page.wait_for_load_state("domcontentloaded")
+            else:
+                raise
         return self
 
     def get_page(self, page_cls: Type[T]) -> T:

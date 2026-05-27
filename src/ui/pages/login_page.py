@@ -38,6 +38,13 @@ class LoginPage(BasePage):
         self.login_button.click()
         return ProjectPanel(self.page)
 
+    def user_login_with_correct_data(self, username: str, password: str):
+        from src.ui.pages.project_page import ProjectPanel
+        self.admin_name_input.fill(value=username)
+        self.admin_password_input.fill(value=password)
+        self.login_button.click()
+        return ProjectPanel(self.page)
+
     def admin_login_with_wrong_password(self, admin_username: str):
         self.admin_name_input.fill(value=admin_username)
         self.admin_password_input.fill(value=admin_username)

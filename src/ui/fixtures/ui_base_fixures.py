@@ -6,6 +6,7 @@ import requests
 from dotenv import load_dotenv
 from playwright.sync_api import BrowserContext, Page
 
+from src.api.classes.api_manager import ApiManager
 from src.api.configs.config import Config
 from src.api.generators.random_data import RandomData
 from src.ui.pages.administration_page import AdminPanel
@@ -35,6 +36,11 @@ def user_credentials():
         "username": RandomData.get_name().lower(),
         "password": RandomData.get_password()
     }
+
+
+@pytest.fixture
+def created_user_via_api(api_manager: ApiManager, user_request):
+    return api_manager.user_steps.admin_create_user(user_request)
 
 
 def _get_session_cookie(username: str, password: str) -> list[dict]:
@@ -87,7 +93,20 @@ def auth_as_admin_web_with_project(context: BrowserContext, admin_username, admi
 
 
 @pytest.fixture
-def auth_as_admin_and_open_user_page(auth_as_admin_web):
+def auth_as_admin_and_open_user_page(auth_as_admin_web, user_request, api_manager):
+    user = api_manager.user_steps.admin_create_user(user_request)
+    users_page = (
+        AdminPanel(auth_as_admin_web)
+        .open()
+        .click_switch_to_users()
+        .check_users_page_opened()
+    )
+    users_page.user = user
+    return users_page
+
+
+@pytest.fixture
+def auth_as_admin_and_open_create_user_page(auth_as_admin_web):
     return (
         AdminPanel(auth_as_admin_web)
         .open()

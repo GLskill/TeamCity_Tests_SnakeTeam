@@ -1,6 +1,7 @@
 import allure
 from playwright.sync_api import expect
 
+from src.api.classes import api_manager
 from src.api.generators.random_data import RandomData
 from src.ui.pages.base_page import BasePage
 
@@ -63,6 +64,7 @@ class AdminCreateUserPage(BasePage):
         with allure.step("Нажать кнопку Create User"):
             self.submit_button.click()
         from src.ui.pages.admin_users_page import UsersPage
+        api_manager.user_steps.created_objects.append(user)
         return UsersPage(self.page)
 
     def click_cancel(self):

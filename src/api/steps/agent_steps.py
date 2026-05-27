@@ -81,3 +81,11 @@ class AgentSteps(BaseSteps):
             ResponseSpecs.request_return_ok(),
         ).get(params={'locator': 'authorized:true'})
         return agents
+
+    def get_connected_authorized_agents(self) -> AgentsListResponse:
+        agents: AgentsListResponse = ValidatedCrudRequester(
+            RequestSpecs.admin_base_headers(),
+            Endpoint.GET_LIST_AGENTS,
+            ResponseSpecs.request_return_ok(),
+        ).get(params={'locator': 'authorized:true,connected:true'})
+        return agents

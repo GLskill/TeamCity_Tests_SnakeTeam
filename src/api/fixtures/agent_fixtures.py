@@ -37,3 +37,21 @@ def authorized_agent(api_manager: ApiManager) -> AgentResponse:
         api_manager.agent_steps.disable_agent(agent)
     except Exception:
         pass
+
+
+@pytest.fixture()
+def connected_authorized_agent(api_manager: ApiManager) -> AgentResponse:
+    agents = api_manager.agent_steps.get_connected_authorized_agents()
+    if not agents.agent:
+        pytest.skip(
+            "Нет подключенных авторизованных агентов в TeamCity. "
+            "Запустите TeamCity agent перед тестами, которым нужен running build."
+        )
+    agent: AgentResponse = agents.agent[0]
+
+    api_manager.agent_steps.enable_agent(agent)
+    yield agent
+    try:
+        api_manager.agent_steps.disable_agent(agent)
+    except Exception:
+        pass

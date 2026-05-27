@@ -28,6 +28,12 @@ def build_type(build_type_request, api_manager) -> BuildTypeResponse:
 
 
 @pytest.fixture()
+def running_build_type(build_type, api_manager) -> BuildTypeResponse:
+    api_manager.build_steps.add_sleep_command_line_step(build_type.id)
+    return build_type
+
+
+@pytest.fixture()
 def queue_build_request(build_type) -> QueueBuildRequest:
     return QueueBuildRequest(buildType=BuildTypeRef(id=build_type.id))
 
@@ -35,6 +41,20 @@ def queue_build_request(build_type) -> QueueBuildRequest:
 @pytest.fixture()
 def queue_build(queue_build_request, api_manager) -> QueueBuildResponse:
     return api_manager.build_steps.add_build_to_queue(queue_build_request)
+
+
+@pytest.fixture()
+def running_queue_build_request(running_build_type, connected_authorized_agent: AgentResponse) -> QueueBuildRequest:
+    return QueueBuildRequest(
+        buildType=BuildTypeRef(id=running_build_type.id),
+        agent=Agent(id=connected_authorized_agent.id),
+        personal=False
+    )
+
+
+@pytest.fixture()
+def running_queue_build(running_queue_build_request, api_manager) -> QueueBuildResponse:
+    return api_manager.build_steps.add_build_to_queue(running_queue_build_request)
 
 
 @pytest.fixture()
