@@ -25,3 +25,10 @@ class UsersPage(BasePage):
             self.create_user_button.click()
         from src.ui.pages.admin_create_user_page import AdminCreateUserPage
         return AdminCreateUserPage(self.page)
+
+    def check_user_exists_in_list(self, username: str):
+        with allure.step(f"Проверить что пользователь '{username}' отображается в списке"):
+            user_row = self.page.locator(f"td a[href*='editUser']:has-text('{username}')")
+            expect(user_row).to_be_visible()
+        return self
+

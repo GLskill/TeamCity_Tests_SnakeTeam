@@ -1,5 +1,8 @@
 import time
 
+import requests
+
+from src.api.configs.config import Config
 from src.enums import BuildState, BuildStatus
 from src.api.models.comparison.model_assertions import ModelAssertions
 from src.api.models.requests import QueueBuildRequest, BuildCancelRequest, CreateBuildTypeRequest, CopyBuildTypeRequest
@@ -23,6 +26,24 @@ class BuildSteps(BaseSteps):
         self.created_objects.append(build_type)
         ModelAssertions(create_build_type_request, build_type).match()
         return build_type
+
+    def add_sleep_command_line_step(self, build_type_id: str, sleep_seconds: int = 120) -> None:
+        response = requests.post(
+            url=f"{Config.get('baseurl')}buildTypes/id:{build_type_id}/steps",
+            json={
+                "name": "Sleep before cancel",
+                "type": "simpleRunner",
+                "properties": {
+                    "property": [
+                        {"name": "script.content", "value": f"sleep {sleep_seconds}"},
+                        {"name": "teamcity.step.mode", "value": "default"},
+                        {"name": "use.custom.script", "value": "true"},
+                    ]
+                },
+            },
+            headers=RequestSpecs.admin_base_headers(),
+        )
+        ResponseSpecs.request_return_ok()(response)
 
     def delete_build_type(self, build_type_id: str) -> None:
         ValidatedCrudRequester(

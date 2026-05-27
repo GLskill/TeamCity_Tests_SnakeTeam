@@ -31,12 +31,12 @@ class TestBuildIntegration:
     def test_cancel_running_build(
             self,
             api_manager: ApiManager,
-            authorized_agent: AgentResponse,
-            queue_build: QueueBuildResponse,
+            running_queue_build: QueueBuildResponse,
             running_build_cancel_request: BuildCancelRequest
     ):
-        canceled_build = api_manager.build_steps.cancel_running_build(running_build_cancel_request, queue_build.id)
-        get_build = api_manager.build_steps.get_queued_build_by_id(queue_build.id)
+        canceled_build = api_manager.build_steps.cancel_running_build(running_build_cancel_request,
+                                                                      running_queue_build.id)
+        get_build = api_manager.build_steps.get_queued_build_by_id(running_queue_build.id)
 
         assert canceled_build.state == get_build.state
         assert canceled_build.status == get_build.status

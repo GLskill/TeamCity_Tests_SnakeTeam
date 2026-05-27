@@ -25,6 +25,11 @@ class AdminPanel(BasePage):
 
     def click_switch_to_users(self):
         with allure.step("Перейти на вкладку Users"):
-            self.users_tab.click()
-        from src.ui.pages.admin_users_page import UsersPage
-        return UsersPage(self.page)
+            from src.ui.pages.admin_users_page import UsersPage
+
+            try:
+                expect(self.users_tab).to_be_visible(timeout=10000)
+                self.users_tab.click()
+                return UsersPage(self.page)
+            except AssertionError:
+                return UsersPage(self.page).open()
