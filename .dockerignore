@@ -12,6 +12,8 @@ build/
 .venv/
 venv/
 test_results/
+allure-results/
+logs/
 .git/
 .gitignore
 .idea/
