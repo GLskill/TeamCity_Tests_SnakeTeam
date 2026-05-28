@@ -1,10 +1,10 @@
 pytest~=8.4.2
+pytest-playwright~=0.8.0
+pytest-base-url~=2.1.0
 requests~=2.32.5
-allure-pytest
+allure-pytest~=2.16.0
 pydantic~=2.11.9
 python-dotenv~=1.0.0
-uuid~=1.30
 Faker~=37.8.0
 rstr~=3.2.2
 playwright~=1.55.0
-pytest-dotenv
