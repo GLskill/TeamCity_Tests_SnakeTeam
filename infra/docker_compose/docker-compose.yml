@@ -1,0 +1,70 @@
+name: teamcity-tests-docker-compose
+
+services:
+  webapp:
+    image: jetbrains/teamcity-server:latest
+    ports:
+      - "8111:8111"
+    volumes:
+      - teamcity-data:/data/teamcity_server/datadir
+      - teamcity-logs:/opt/teamcity/logs
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8111/mnt || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+    networks:
+      - team-city-shared-network
+
+  agent:
+    image: jetbrains/teamcity-agent:latest
+    environment:
+      - SERVER_URL=http://webapp:8111
+    depends_on:
+      webapp:
+        condition: service_healthy
+    networks:
+      - team-city-shared-network
+
+  setup:
+    image: glskill/teamcity-tests-version1:latest
+    depends_on:
+      webapp:
+        condition: service_healthy
+    environment:
+      - UI_BASE_URL=http://webapp:8111
+      - ENV_FILE=/app/.env
+    volumes:
+      - ../../:/app
+    entrypoint: ["sh", "-c", "xvfb-run -a python /app/infra/docker_compose/set_up.py"]
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /app/.env || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
+    networks:
+      - team-city-shared-network
+
+  tests:
+    image: glskill/teamcity-tests-version1:latest
+    depends_on:
+      setup:
+        condition: service_healthy
+    environment:
+      - SERVER=http://webapp:8111/app/rest/
+      - UI_BASE_URL=http://webapp:8111
+      - ENV_FILE=/app/.env
+    volumes:
+      - ../../:/app
+    entrypoint: ["sh", "-c", "xvfb-run -a pytest -v --tb=short --alluredir allure-results"]
+    networks:
+      - team-city-shared-network
+
+networks:
+  team-city-shared-network:
+    name: team-city-shared-network
+
+volumes:
+  teamcity-data:
+  teamcity-logs:
