@@ -74,3 +74,4 @@ class UiAlert(StrEnum):
 class UiFirstUp(StrEnum):
     ADMIN_USERNAME = "admin"
     ADMIN_PASSWORD = "admin123"
+    TOKEN_NAME = "pytest-token"

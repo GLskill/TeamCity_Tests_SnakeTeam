@@ -22,4 +22,7 @@ class Config:
 
     @staticmethod
     def get(key: str, default_value: Any = None) -> Any:
+        env_val = os.environ.get(key)
+        if env_val is not None:
+            return env_val
         return Config()._properties.get(key, default_value)

@@ -33,7 +33,9 @@ services:
         condition: service_healthy
     environment:
       - UI_BASE_URL=http://webapp:8111
+      - baseurl=http://webapp:8111/app/rest/
       - ENV_FILE=/app/.env
+      - PYTHONPATH=/app
     volumes:
       - ../../:/app
     entrypoint: ["sh", "-c", "xvfb-run -a python /app/infra/docker_compose/set_up.py"]
@@ -52,12 +54,25 @@ services:
       setup:
         condition: service_healthy
     environment:
-      - SERVER=http://webapp:8111/app/rest/
       - UI_BASE_URL=http://webapp:8111
+      - baseurl=http://webapp:8111/app/rest/
       - ENV_FILE=/app/.env
+      - PYTHONPATH=/app
+      - TC_ADMIN_USERNAME=admin
+      - TC_ADMIN_PASSWORD=admin123
     volumes:
       - ../../:/app
-    entrypoint: ["sh", "-c", "xvfb-run -a pytest -v --tb=short --alluredir allure-results"]
+    entrypoint:
+      - sh
+      - -c
+      - |
+        echo '[tests] Ожидаем REST API...'
+        until curl -sf http://webapp:8111/app/rest/server -u "$TC_ADMIN_USERNAME:$TC_ADMIN_PASSWORD" > /dev/null 2>&1; do
+          echo '[tests] TeamCity ещё не готов, ждём 5s...'
+          sleep 5
+        done
+        echo '[tests] REST API готов, запускаем тесты'
+        xvfb-run -a pytest -v --tb=short --alluredir allure-results
     networks:
       - team-city-shared-network
 
