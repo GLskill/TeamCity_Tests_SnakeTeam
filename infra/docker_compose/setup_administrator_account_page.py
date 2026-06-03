@@ -6,6 +6,7 @@ from src.ui.pages.base_page import BasePage
 
 WAIT_TIMEOUT = 120_000
 
+
 class CreateAdministratorAccount(BasePage):
 
     def url(self):
@@ -61,3 +62,14 @@ class CreateAdministratorAccount(BasePage):
         self.fill_admin_password_and_confirm()
         self.click_create_account_button()
         return ProjectPanel(self.page)
+
+    @property
+    def link_create_administrator_account(self):
+        return self.page.get_by_role("link", name="Login as Super user")
+
+    def click_link_login_via_super_admin(self):
+        from infra.docker_compose.superadmin_page import LoginAsSuperAdmin
+        self.link_create_administrator_account.click()
+        self.page.wait_for_load_state("networkidle")
+        return LoginAsSuperAdmin(self.page)
+

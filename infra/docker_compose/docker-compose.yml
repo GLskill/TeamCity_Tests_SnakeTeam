@@ -3,83 +3,68 @@ name: teamcity-tests-docker-compose
 services:
   webapp:
     image: jetbrains/teamcity-server:latest
+    container_name: teamcity-server-instance
     ports:
       - "8111:8111"
     volumes:
       - teamcity-data:/data/teamcity_server/datadir
       - teamcity-logs:/opt/teamcity/logs
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8111/mnt || exit 1"]
-      interval: 15s
+      test: ["CMD-SHELL", "curl -sfL http://localhost:8111/mnt -o /dev/null || exit 1"]
+      interval: 10s
       timeout: 5s
-      retries: 20
+      retries: 24
+      start_period: 30s
     networks:
-      - team-city-shared-network
+      - teamcity-net
 
   agent:
-    image: jetbrains/teamcity-agent:latest
+    image: jetbrains/teamcity-minimal-agent:latest
+    container_name: teamcity-agent-instance
     environment:
-      - SERVER_URL=http://webapp:8111
+      - SERVER_URL=http://teamcity-server-instance:8111
+    volumes:
+      - teamcity-agent-conf:/data/teamcity_agent/conf
     depends_on:
-      webapp:
-        condition: service_healthy
+      - webapp
     networks:
-      - team-city-shared-network
+      - teamcity-net
 
   setup:
     image: glskill/teamcity-tests-version1:latest
+    container_name: teamcity-setup
     depends_on:
       webapp:
         condition: service_healthy
     environment:
       - UI_BASE_URL=http://webapp:8111
-      - baseurl=http://webapp:8111/app/rest/
       - ENV_FILE=/app/.env
+      - TC_LOG_FILE=/teamcity-logs/teamcity-server.log
       - PYTHONPATH=/app
     volumes:
       - ../../:/app
-    entrypoint: ["sh", "-c", "xvfb-run -a python /app/infra/docker_compose/set_up.py"]
-    healthcheck:
-      test: ["CMD-SHELL", "test -f /app/.env || exit 1"]
-      interval: 5s
-      timeout: 3s
-      retries: 30
-      start_period: 10s
-    networks:
-      - team-city-shared-network
-
-  tests:
-    image: glskill/teamcity-tests-version1:latest
-    depends_on:
-      setup:
-        condition: service_healthy
-    environment:
-      - UI_BASE_URL=http://webapp:8111
-      - baseurl=http://webapp:8111/app/rest/
-      - ENV_FILE=/app/.env
-      - PYTHONPATH=/app
-      - TC_ADMIN_USERNAME=admin
-      - TC_ADMIN_PASSWORD=admin123
-    volumes:
-      - ../../:/app
+      - teamcity-logs:/teamcity-logs:ro
     entrypoint:
       - sh
       - -c
       - |
-        echo '[tests] Ожидаем REST API...'
-        until curl -sf http://webapp:8111/app/rest/server -u "$TC_ADMIN_USERNAME:$TC_ADMIN_PASSWORD" > /dev/null 2>&1; do
-          echo '[tests] TeamCity ещё не готов, ждём 5s...'
-          sleep 5
-        done
-        echo '[tests] REST API готов, запускаем тесты'
-        xvfb-run -a pytest -v --tb=short --alluredir allure-results
+        xvfb-run -a python /app/infra/docker_compose/set_up.py
+        echo '[setup] Готово, держим контейнер живым...'
+        tail -f /dev/null
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /app/.env"]
+      interval: 5s
+      timeout: 3s
+      retries: 60
+      start_period: 10s
     networks:
-      - team-city-shared-network
+      - teamcity-net
 
 networks:
-  team-city-shared-network:
-    name: team-city-shared-network
+  teamcity-net:
+    name: teamcity-net
 
 volumes:
   teamcity-data:
   teamcity-logs:
+  teamcity-agent-conf:
