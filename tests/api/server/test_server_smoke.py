@@ -22,3 +22,4 @@ class TestServerSmoke:
     @allure.title("GET /users/current — HTTP 401, отсутсвтует или не верный токен")
     def test_get_current_user_unauthorized(self, api_manager: ApiManager):
         api_manager.server_steps.get_current_user_unauthorized()
+
