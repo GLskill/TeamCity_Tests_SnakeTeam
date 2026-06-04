@@ -1,0 +1,58 @@
+# ── Setup Job ─────────────────────────────────────────────────────
+# В docker-compose setup был сервисом с restart: "no".
+# В K8s для одноразовых задач используется Job.
+# Job запускается один раз, при успехе (exit 0) не перезапускается.
+# backoffLimit: 0 — не пытаться перезапускать при ошибке.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: teamcity-setup
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      initContainers:
+        # initContainer ждёт пока TeamCity Server станет доступным.
+        # Аналог depends_on: webapp: condition: service_healthy в docker-compose.
+        - name: wait-for-server
+          image: curlimages/curl:latest
+          command:
+            - sh
+            - -c
+            - |
+              echo "[init] Ждём TeamCity Server..."
+              until curl -sfL http://teamcity-server:{{ .Values.webapp.port }}/mnt -o /dev/null; do
+                echo "[init] Сервер ещё не готов, ждём 5 сек..."
+                sleep 5
+              done
+              echo "[init] Сервер готов!"
+      containers:
+        - name: setup
+          image: {{ .Values.setup.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          env:
+            - name: UI_BASE_URL
+              value: "http://teamcity-server:{{ .Values.webapp.port }}"
+            - name: baseurl
+              value: "http://teamcity-server:{{ .Values.webapp.port }}/app/rest/"
+            - name: ENV_FILE
+              value: /app/.env
+            - name: TC_LOG_FILE
+              value: /teamcity-logs/teamcity-server.log
+            - name: PYTHONPATH
+              value: /app
+          command:
+            - sh
+            - -c
+            - |
+              xvfb-run -a python /app/infra/docker_compose/set_up.py
+              echo '[setup] ✅ Завершён успешно'
+          volumeMounts:
+            - name: teamcity-logs
+              mountPath: /teamcity-logs
+              readOnly: true
+      volumes:
+        - name: teamcity-logs
+          persistentVolumeClaim:
+            claimName: teamcity-logs
