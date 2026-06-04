@@ -80,8 +80,11 @@ services:
       - ENV_FILE=/app/.env
       - PYTHONPATH=/app
       - PYTHONUNBUFFERED=1
+      - FORCE_COLOR=1
+      - TERM=xterm-256color
     volumes:
       - ../../:/app
+      - ../../allure-results:/app/allure-results
     working_dir: /app
     entrypoint:
       - sh
