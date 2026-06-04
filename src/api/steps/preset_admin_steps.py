@@ -11,14 +11,12 @@ from src.enums import UiFirstUp
 class PreAdminSteps(BaseSteps):
 
     def setup_create_token(self, token_name: str) -> str:
-        """Создаёт токен через Basic Auth — используется только в set_up.py."""
         user: UserResponse = ValidatedCrudRequester(
             RequestSpecs.admin_basic_auth_headers(),
             Endpoint.GET_USER,
             ResponseSpecs.request_return_ok(),
         ).get(locator=f'username:{UiFirstUp.ADMIN_USERNAME}')
 
-        # Удаляем старый токен если есть (идемпотентность)
         CrudRequester(
             request_spec=RequestSpecs.admin_basic_auth_headers(),
             endpoint=Endpoint.DELETE_USER_TOKEN,
