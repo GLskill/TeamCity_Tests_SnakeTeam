@@ -22,6 +22,14 @@ class ProjectSteps(BaseSteps):
         assert projects.count >= 1
         return projects
 
+    def get_all_projects(self) -> ProjectsListResponse:
+        projects: ProjectsListResponse = ValidatedCrudRequester(
+            RequestSpecs.admin_base_headers(),
+            Endpoint.GET_PROJECTS,
+            ResponseSpecs.request_return_ok(),
+        ).get()
+        return projects
+
     def get_projects_unauthorized(self):
         CrudRequester(
             request_spec=RequestSpecs.unauth_spec(),

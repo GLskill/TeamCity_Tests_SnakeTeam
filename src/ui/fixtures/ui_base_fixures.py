@@ -115,3 +115,26 @@ def auth_as_admin_and_open_create_user_page(auth_as_admin_web):
         .click_create_user()
         .check_create_user_page_opened()
     )
+
+
+@pytest.fixture()
+def auth_as_admin_web_no_projects(context: BrowserContext, admin_username, admin_password) -> Page:
+    manager = ApiManager([])
+    projects = manager.project_steps.get_all_projects()
+    for project in (projects.project or []):
+        project_id = project["id"] if isinstance(project, dict) else project.id
+        if project_id != "_Root":
+            try:
+                manager.project_steps.delete_project(project_id)
+            except Exception:
+                pass
+
+    context.add_cookies(_get_session_cookie(admin_username, admin_password))
+    page = context.new_page()
+    page.set_viewport_size({"width": 1920, "height": 1080})
+    base_url = str(Config.get("UI_BASE_URL", "http://localhost:8111")).rstrip("/")
+    page.goto(f"{base_url}/favorite/projects", wait_until="domcontentloaded")
+
+    yield page
+
+    page.close()

@@ -44,7 +44,7 @@ def setup_teamcity_ui() -> str:
             .open()
             .accept_first_start()
             .accept_database_setup()
-            .accept_license_agreement()
+            .accept_license_agreement()     #.create_admin_account()
         )
 
         token = get_super_user_token()
@@ -129,7 +129,6 @@ def authorize_agent(token: str, timeout: int = 180) -> None:
         data="true",
         timeout=10
     )
-    print(f"[setup] PUT authorized → status={put_r.status_code}, body={put_r.text[:300]}")
 
     # Шаг 4: ждём пока агент реально появится в authorized:true
     print("[setup] Ждём подтверждения авторизации...")
@@ -140,20 +139,11 @@ def authorize_agent(token: str, timeout: int = 180) -> None:
                 headers=headers,
                 timeout=5
             )
-            print(f"[setup] authorized:true → status={r.status_code}, body={r.text[:300]}")
             if r.status_code == 200:
                 agents = r.json().get("agent", [])
                 if any(a["id"] == agent_id for a in agents):
                     print(f"[setup] Агент id:{agent_id} авторизован и подтверждён ✓")
                     return
-
-            # Дополнительно: смотрим текущий статус агента напрямую
-            r2 = requests.get(
-                f"{TC_URL}/app/rest/agents/id:{agent_id}",
-                headers=headers,
-                timeout=5
-            )
-            print(f"[setup] agent id:{agent_id} direct → status={r2.status_code}, body={r2.text[:300]}")
         except Exception as e:
             print(f"[setup] Ошибка при проверке: {e}")
         time.sleep(5)
@@ -167,8 +157,8 @@ def save_token_to_env(token: str) -> None:
         os.makedirs(env_dir, exist_ok=True)
     with open(ENV_FILE, "w") as f:
         f.write(f"TC_ADMIN_TOKEN={token}\n")
-        f.write(f"TC_ADMIN_USERNAME=\n")
-        f.write(f"TC_ADMIN_PASSWORD={token}\n")
+        f.write(f"TC_ADMIN_USERNAME=admin\n")
+        f.write(f"TC_ADMIN_PASSWORD=admin123\n")
     print(f"[setup] Credentials сохранены → {ENV_FILE} ✓")
 
 
