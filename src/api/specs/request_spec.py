@@ -25,3 +25,12 @@ class RequestSpecs:
         headers = RequestSpecs.default_req_headers()
         headers['Authorization'] = f'Basic {credentials}'
         return headers
+
+    @staticmethod
+    def super_user_headers():
+        credentials = base64.b64encode(
+            f":{os.getenv('TC_ADMIN_TOKEN')}".encode()
+        ).decode()
+        headers = RequestSpecs.default_req_headers()
+        headers['Authorization'] = f'Basic {credentials}'
+        return headers
