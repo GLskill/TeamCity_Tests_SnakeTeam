@@ -45,6 +45,7 @@ def setup_teamcity_ui() -> str:
             .accept_first_start()
             .accept_database_setup()
             .accept_license_agreement()     #.create_admin_account()
+            .check_banner_administrator()    # проверка что оурежение настроено !
         )
 
         token = get_super_user_token()

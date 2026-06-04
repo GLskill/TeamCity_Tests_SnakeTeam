@@ -21,23 +21,34 @@ services:
   agent:
     image: jetbrains/teamcity-minimal-agent:latest
     container_name: teamcity-agent-instance
+    logging:
+      driver: "none"
     environment:
       - SERVER_URL=http://teamcity-server-instance:8111
     volumes:
       - teamcity-agent-conf:/data/teamcity_agent/conf
     depends_on:
-      - webapp
+      webapp:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /data/teamcity_agent/conf/buildAgent.properties"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
     networks:
       - teamcity-net
 
   setup:
     image: glskill/teamcity-tests-version1:latest
     container_name: teamcity-setup
+    restart: "no"
     depends_on:
       webapp:
         condition: service_healthy
     environment:
       - UI_BASE_URL=http://webapp:8111
+      - baseurl=http://webapp:8111/app/rest/
       - ENV_FILE=/app/.env
       - TC_LOG_FILE=/teamcity-logs/teamcity-server.log
       - PYTHONPATH=/app
@@ -49,14 +60,38 @@ services:
       - -c
       - |
         xvfb-run -a python /app/infra/docker_compose/set_up.py
-        echo '[setup] Готово, держим контейнер живым...'
-        tail -f /dev/null
-    healthcheck:
-      test: ["CMD-SHELL", "test -f /app/.env"]
-      interval: 5s
-      timeout: 3s
-      retries: 60
-      start_period: 10s
+        echo '[setup] ✅ Завершён успешно'
+    networks:
+      - teamcity-net
+
+  tests:
+    image: glskill/teamcity-tests-version1:latest
+    container_name: teamcity-tests
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+      agent:
+        condition: service_healthy
+      webapp:
+        condition: service_healthy
+    environment:
+      - UI_BASE_URL=http://webapp:8111
+      - baseurl=http://webapp:8111/app/rest/
+      - ENV_FILE=/app/.env
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ../../:/app
+    working_dir: /app
+    entrypoint:
+      - sh
+      - -c
+      - |
+        echo '[tests] Все сервисы готовы, запускаем pytest...'
+        xvfb-run -a pytest -v
+        EXIT_CODE=$?
+        echo '[tests] pytest завершён'
+        exit $EXIT_CODE
     networks:
       - teamcity-net
 
