@@ -1,0 +1,22 @@
+# ── Общие настройки ──────────────────────────────────────────────
+imagePullPolicy: Always
+
+# ── TeamCity Server ───────────────────────────────────────────────
+webapp:
+  image: jetbrains/teamcity-server:latest
+  port: 8111
+  storage:
+    data: 5Gi    # хранилище данных TeamCity
+    logs: 1Gi    # хранилище логов
+
+# ── TeamCity Agent ────────────────────────────────────────────────
+agent:
+  image: jetbrains/teamcity-minimal-agent:latest
+
+# ── Setup Job (UI wizard + авторизация агента) ────────────────────
+setup:
+  image: glskill/teamcity-tests-version1:latest
+
+# ── Tests Job ─────────────────────────────────────────────────────
+tests:
+  image: glskill/teamcity-tests-version1:latest

@@ -37,15 +37,21 @@ class ProjectSteps(BaseSteps):
             response_spec=ResponseSpecs.request_return_unauth(),
         ).get()
 
-    def get_project_by_id(self, project_id: str) -> ProjectResponse:
-        project: ProjectResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
-            Endpoint.GET_PROJECT,
-            ResponseSpecs.request_return_ok(),
-        ).get(locator=project_id)
-
-        assert project.id == project_id
-        return project
+    def get_project_by_id(self, project_id: str, retries: int = 10, delay: float = 1.0) -> ProjectResponse:
+        import time
+        for attempt in range(retries):
+            try:
+                project: ProjectResponse = ValidatedCrudRequester(
+                    RequestSpecs.admin_base_headers(),
+                    Endpoint.GET_PROJECT,
+                    ResponseSpecs.request_return_ok(),
+                ).get(locator=project_id)
+                assert project.id == project_id
+                return project
+            except Exception:
+                if attempt < retries - 1:
+                    time.sleep(delay)
+        raise AssertionError(f"Project '{project_id}' not found after {retries} retries")
 
     def get_project_by_id_and_track(self, project_id: str) -> ProjectResponse:
         project = self.get_project_by_id(project_id)

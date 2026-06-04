@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: "2024.03"
+description: Helm chart for TeamCity Server + Agent + Tests
+name: teamcity
+type: application
+version: 0.1.0

@@ -1,0 +1,55 @@
+name: Run TeamCity Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  run-tests:
+    name: Start TeamCity + Run Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Start environment and run tests
+        run: |
+          docker compose -f infra/docker_compose/docker-compose.yml up -d --wait
+        timeout-minutes: 50
+
+      - name: Show test logs
+        if: always()
+        run: |
+          docker compose -f infra/docker_compose/docker-compose.yml logs tests
+
+      - name: Check test result
+        run: |
+          EXIT_CODE=$(docker inspect teamcity-tests --format='{{.State.ExitCode}}')
+          echo "pytest exit code: $EXIT_CODE"
+          exit "$EXIT_CODE"
+
+      - name: Generate Allure report
+        uses: simple-elf/allure-report-action@master
+        if: always()
+        with:
+          allure_results: allure-results
+          allure_report: allure-report
+
+      - name: Upload Allure report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-report-${{ github.run_number }}
+          path: allure-report
+          retention-days: 30
+
+      - name: Stop environment
+        if: always()
+        run: |
+          docker compose -f infra/docker_compose/docker-compose.yml down -v

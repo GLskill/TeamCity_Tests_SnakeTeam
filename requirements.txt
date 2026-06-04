@@ -1,4 +1,5 @@
 pytest~=8.4.2
+pytest-sugar~=1.0.0
 pytest-playwright~=0.8.0
 pytest-base-url~=2.1.0
 requests~=2.32.5
