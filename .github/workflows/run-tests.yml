@@ -2,14 +2,15 @@ name: Run TeamCity Tests
 
 on:
   push:
-    paths:
-      - 'src/**'
-      - 'tests/**'
+    branches:
+      - main
   pull_request:
-    paths:
-      - 'src/**'
-      - 'tests/**'
+    branches:
+      - main
   workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   run-tests:
@@ -19,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Start environment and run tests
         run: |
@@ -35,21 +36,60 @@ jobs:
         run: |
           EXIT_CODE=$(docker inspect teamcity-tests --format='{{.State.ExitCode}}')
           echo "pytest exit code: $EXIT_CODE"
+
+          # Парсим результаты из логов и пишем в Summary
+          LOGS=$(docker compose -f infra/docker_compose/docker-compose.yml logs tests 2>/dev/null)
+          SUMMARY=$(echo "$LOGS" | grep -E "passed|failed|error" | tail -1 | sed 's/.*| //')
+
+          echo "## 🧪 Test Results" >> $GITHUB_STEP_SUMMARY
+          if [ "$EXIT_CODE" -eq 0 ]; then
+            echo "### ✅ $SUMMARY" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ❌ $SUMMARY" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📦 Allure report available in **Artifacts** section below" >> $GITHUB_STEP_SUMMARY
+
           exit "$EXIT_CODE"
+
+      - name: Publish test results
+        uses: EnricoMi/publish-test-results-action@v2
+        if: always()
+        with:
+          files: test-results/results.xml
+
+      - name: Load Allure history
+        uses: actions/checkout@v5
+        if: always()
+        with:
+          ref: gh-pages
+          path: gh-pages
+        continue-on-error: true
 
       - name: Generate Allure report
         uses: simple-elf/allure-report-action@master
         if: always()
         with:
           allure_results: allure-results
-          allure_report: allure-report
+          gh_pages: gh-pages
+          allure_history: allure-history
+          keep_reports: 20
 
-      - name: Upload Allure report
+      - name: Publish Allure report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        if: always()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-history
+          keep_files: true
+
+      - name: Upload Allure report as artifact
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: allure-report-${{ github.run_number }}
-          path: allure-report
+          path: allure-history
           retention-days: 30
 
       - name: Stop environment

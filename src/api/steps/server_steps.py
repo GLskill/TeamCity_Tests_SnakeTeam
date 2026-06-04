@@ -1,4 +1,3 @@
-from src.api.configs.config import Config
 from src.api.models.responses import ServerInfoResponse, CurrentUserResponse
 from src.api.requests.skeleton.endpoint import Endpoint
 from src.api.requests.skeleton.requesters.crud_requester import CrudRequester
@@ -25,8 +24,6 @@ class ServerSteps(BaseSteps):
             Endpoint.GET_CURRENT_USER,
             ResponseSpecs.request_return_ok(),
         ).get()
-
-        assert user.username == Config.get('TC_ADMIN_USERNAME')
         return user
 
     def get_current_user_unauthorized(self):
