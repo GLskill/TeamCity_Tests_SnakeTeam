@@ -69,3 +69,9 @@ class UiAlert(StrEnum):
     AGENTS_OVERVIEW = 'Overview'
     AGENTS_FAVORITE_POOLS = 'Favorite Agent Pools'
     QUEUE = 'Builds in queue'
+
+
+class UiFirstUp(StrEnum):
+    ADMIN_USERNAME = "admin"
+    ADMIN_PASSWORD = "admin123"
+    TOKEN_NAME = "pytest-token"

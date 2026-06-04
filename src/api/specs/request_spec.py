@@ -1,5 +1,7 @@
+import base64
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 
 
@@ -17,6 +19,18 @@ class RequestSpecs:
 
     @staticmethod
     def admin_base_headers():
+        credentials = base64.b64encode(
+            f":{os.getenv('TC_ADMIN_TOKEN')}".encode()
+        ).decode()
         headers = RequestSpecs.default_req_headers()
-        headers['Authorization'] = f'Bearer {os.getenv("TC_ADMIN_TOKEN")}'
+        headers['Authorization'] = f'Basic {credentials}'
+        return headers
+
+    @staticmethod
+    def super_user_headers():
+        credentials = base64.b64encode(
+            f":{os.getenv('TC_ADMIN_TOKEN')}".encode()
+        ).decode()
+        headers = RequestSpecs.default_req_headers()
+        headers['Authorization'] = f'Basic {credentials}'
         return headers

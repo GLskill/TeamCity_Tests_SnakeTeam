@@ -96,15 +96,6 @@ class AdminUserSteps(BaseSteps):
         ).get(locator=f'id:{user_id}/groups')
         return groups.group or []
 
-    def admin_update_user_groups(self, user_id: int, group_keys: list[str]) -> list:
-        body = GroupsUpdateRequest(group=[GroupRef(key=k) for k in group_keys])
-        groups: GroupsListResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
-            Endpoint.UPDATE_USER_GROUPS,
-            ResponseSpecs.request_return_ok(),
-        ).put(locator=f'id:{user_id}/groups', body=body)
-        return groups.group or []
-
     def admin_remove_user_from_group(self, user_id: int, group_locator: str) -> None:
         ValidatedCrudRequester(
             RequestSpecs.admin_base_headers(),
@@ -118,15 +109,6 @@ class AdminUserSteps(BaseSteps):
             Endpoint.GET_USER_ROLES,
             ResponseSpecs.request_return_ok(),
         ).get(locator=f'id:{user_id}/roles')
-        return roles.role or []
-
-    def admin_update_user_roles(self, user_id: int, role_id: str, scope: str) -> list:
-        body = RolesUpdateRequest(role=[RoleRef(roleId=role_id, scope=scope)])
-        roles: RolesListResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
-            Endpoint.UPDATE_USER_ROLES,
-            ResponseSpecs.request_return_ok(),
-        ).put(locator=f'id:{user_id}/roles', body=body)
         return roles.role or []
 
     def admin_remove_user_role(self, user_id: int, role_id: str, scope: str) -> None:
