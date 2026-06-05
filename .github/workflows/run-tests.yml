@@ -26,14 +26,13 @@ on:
         default: ""
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   COMPOSE_FILE: infra/docker_compose/docker-compose.yml
   UI_BASE_URL: http://localhost:8111
   baseurl: http://localhost:8111/app/rest/
 
 jobs:
   run-tests:
-    name: Start TeamCity + Run Tests
+    name: Run TeamCity Tests
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
@@ -43,7 +42,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      # ── Python + зависимости на раннере ─────────────────────────
+      # 1. Python + зависимости
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -54,82 +53,38 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
           restore-keys: ${{ runner.os }}-pip-
 
-      - name: Install deps
+      - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
           pip install -r requirements.txt
           playwright install --with-deps chromium firefox
 
-      # ── Запускаем только инфраструктуру (без tests контейнера) ──
-      - name: Start TeamCity infrastructure
-        run: |
-          docker compose -f $COMPOSE_FILE up -d webapp agent
-        timeout-minutes: 5
+      # 2. Поднимаем окружение (Server + Agent + Setup)
+      - name: Start environment
+        run: docker compose -f $COMPOSE_FILE up -d --wait webapp agent setup
+        timeout-minutes: 15
 
-      - name: Wait for TeamCity Server
-        run: |
-          echo "Waiting for TeamCity Server..."
-          for i in {1..60}; do
-            if curl -sf http://localhost:8111/mnt -o /dev/null; then
-              echo "TeamCity is ready!"
-              break
-            fi
-            echo "Attempt $i/60, waiting..."
-            sleep 5
-          done
-          curl -sf http://localhost:8111/mnt -o /dev/null || (echo "TeamCity not ready!" && exit 1)
-
-      - name: Run TeamCity Setup
-        run: |
-          docker compose -f $COMPOSE_FILE up setup
-        timeout-minutes: 10
-
-      - name: Wait for Agent
-        run: |
-          echo "Waiting for agent to be authorized..."
-          for i in {1..24}; do
-            if docker inspect --format='{{.State.Health.Status}}' teamcity-agent-instance | grep -q healthy; then
-              echo "Agent is healthy!"
-              break
-            fi
-            sleep 5
-          done
-
-      - name: Run Pytest
+      # 3. Запускаем тесты
+      - name: Run tests
         env:
           ENV_FILE: .env
           PYTHONPATH: .
         run: |
-          set -eux
-
           SUITE="${{ inputs.suite }}"
           MARKERS="${{ inputs.markers }}"
-
           OPTS=""
           [ -n "$MARKERS" ] && OPTS="-m $MARKERS"
 
-          if [ "$SUITE" = "api" ]; then
-            pytest tests/ -m api $OPTS -v
-          elif [ "$SUITE" = "ui" ]; then
-            pytest tests/ -m ui $OPTS -v
-          else
-            pytest tests/ $OPTS -v
+          if   [ "$SUITE" = "api" ]; then pytest tests/ -m api $OPTS -v
+          elif [ "$SUITE" = "ui"  ]; then pytest tests/ -m ui  $OPTS -v
+          else                            pytest tests/        $OPTS -v
           fi
 
-      # ── Summary ─────────────────────────────────────────────────
-      - name: Write Summary
-        if: always()
-        run: |
-          echo "## 🧪 TeamCity Test Results" >> $GITHUB_STEP_SUMMARY
-          echo "📊 Allure report: https://glskill.github.io/TeamCity_Tests_SnakeTeam/${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
-
-      # ── Останавливаем инфраструктуру ────────────────────────────
+      # 4. Очищаем окружение
       - name: Stop environment
         if: always()
-        run: |
-          docker compose -f $COMPOSE_FILE down -v
+        run: docker compose -f $COMPOSE_FILE down -v
 
-      # ── Allure отчёт на GitHub Pages ────────────────────────────
+      # 5. Allure отчёт → GitHub Pages
       - name: Load Allure history
         uses: actions/checkout@v5
         if: always()
@@ -147,7 +102,7 @@ jobs:
           allure_history: allure-history
           keep_reports: 20
 
-      - name: Publish Allure report to GitHub Pages
+      - name: Publish report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         if: always()
         with:
