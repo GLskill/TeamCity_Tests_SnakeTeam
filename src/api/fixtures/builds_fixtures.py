@@ -1,3 +1,4 @@
+import allure
 import pytest
 
 from src.enums import BuildComment, VcsRootParams
@@ -18,7 +19,13 @@ def build_type_request(created_project) -> CreateBuildTypeRequest:
 
 @pytest.fixture()
 def build_type(build_type_request, admin_api_manager) -> BuildTypeResponse:
-    return admin_api_manager.build_steps.create_build_type(build_type_request)
+    build = admin_api_manager.build_steps.create_build_type(build_type_request)
+    allure.attach(
+        f"id: {build.id}\nname: {build.name}\nproject id: {build.project.id if build.project else '—'}",
+        name="Build type",
+        attachment_type=allure.attachment_type.TEXT,
+    )
+    return build
 
 
 @pytest.fixture()

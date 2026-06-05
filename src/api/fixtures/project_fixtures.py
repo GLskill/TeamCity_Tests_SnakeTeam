@@ -1,3 +1,4 @@
+import allure
 import pytest
 
 from src.api.generators.data_factory import make_sub_project_request
@@ -19,6 +20,11 @@ def get_project_request():
 @pytest.fixture()
 def created_project(get_project_request, admin_api_manager):
     project = admin_api_manager.project_steps.create_project(get_project_request)
+    allure.attach(
+        f"id: {project.id}\nname: {project.name}",
+        name="Created project",
+        attachment_type=allure.attachment_type.TEXT,
+    )
     return project
 
 
@@ -50,4 +56,9 @@ def sub_project_request(created_project) -> CreateProjectRequest:
 def target_project(admin_api_manager, created_objects) -> ProjectResponse:
     project_data = RandomModelGenerator.generate(CreateProjectRequest)
     project = admin_api_manager.project_steps.create_project(project_data)
+    allure.attach(
+        f"id: {project.id}\nname: {project.name}",
+        name="Target project",
+        attachment_type=allure.attachment_type.TEXT,
+    )
     return project

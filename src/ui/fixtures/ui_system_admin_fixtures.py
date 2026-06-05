@@ -1,3 +1,4 @@
+import allure
 import pytest
 from playwright.sync_api import BrowserContext, Page
 
@@ -33,6 +34,12 @@ def ui_system_admin(created_objects):
     api_manager = ApiManager(created_objects)
     user_request: CreateUserRequest = RandomModelGenerator.generate(CreateUserRequest)
     user = api_manager.super_user_steps.create_system_admin(user_request)
+
+    allure.attach(
+        f"username: {user.username}\npassword: {user_request.password}\nid: {user.id}",
+        name="System Admin credentials",
+        attachment_type=allure.attachment_type.TEXT,
+    )
 
     yield {
         "username": user.username,
