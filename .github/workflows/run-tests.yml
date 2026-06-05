@@ -25,10 +25,15 @@ on:
         required: false
         default: ""
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   COMPOSE_FILE: infra/docker_compose/docker-compose.yml
   UI_BASE_URL: http://localhost:8111
   baseurl: http://localhost:8111/app/rest/
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   run-tests:
