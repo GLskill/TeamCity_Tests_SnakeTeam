@@ -1,0 +1,4 @@
+
+[CLEANUP] objects to clean: [ProjectResponse(id='ProjectId_r3vd', name='ProjectName_gi66', archived=None, parentProjectId='_Root'), VcsRootResponse(id='ProjectId_r3vd_RootcVpO27f9b65a', name='VcsRoot_cVpO27f9b65a', vcsName='jetbrains.git', project={'id': 'ProjectId_r3vd', 'name': 'ProjectName_gi66', 'parentProjectId': '_Root', 'href': '/app/rest/projects/id:ProjectId_r3vd', 'webUrl': 'http://localhost:8111/project.html?projectId=ProjectId_r3vd'})]
+[CLEANUP] Deleting project: ProjectId_r3vd
+[CLEANUP] Deleted OK: ProjectId_r3vd
