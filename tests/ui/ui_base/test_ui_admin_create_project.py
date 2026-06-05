@@ -7,7 +7,6 @@ from src.ui.pages.project_page import ProjectPanel
 
 
 @pytest.mark.ui
-@pytest.mark.projects
 class TestUICreateProject:
 
     @allure.id("70")

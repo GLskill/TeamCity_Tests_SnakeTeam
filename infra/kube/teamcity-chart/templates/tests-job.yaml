@@ -1,7 +1,3 @@
-# ── Tests Job ─────────────────────────────────────────────────────
-# Аналог сервиса tests в docker-compose.
-# Запускается после setup-job через initContainer который ждёт
-# завершения setup (в K8s нет depends_on как в compose).
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -12,8 +8,6 @@ spec:
     spec:
       restartPolicy: Never
       initContainers:
-        # Ждём пока setup-job завершится успешно.
-        # Проверяем появление .env файла — признак успешного setup.
         - name: wait-for-setup
           image: {{ .Values.tests.image }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
@@ -27,7 +21,7 @@ spec:
                 sleep 5
               done
               echo "[init] Setup завершён!"
-        # Ждём пока агент станет healthy (авторизован).
+
         - name: wait-for-agent
           image: curlimages/curl:latest
           env:

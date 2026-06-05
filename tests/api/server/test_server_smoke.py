@@ -4,8 +4,6 @@ import pytest
 from src.api.classes.api_manager import ApiManager
 
 
-@pytest.mark.smoke
-@pytest.mark.server
 @pytest.mark.api
 class TestServerSmoke:
 

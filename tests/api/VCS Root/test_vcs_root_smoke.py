@@ -4,8 +4,6 @@ import pytest
 from src.api.classes.api_manager import ApiManager
 
 
-@pytest.mark.smoke
-@pytest.mark.vcs_root
 @pytest.mark.api
 class TestVcsRootSmoke:
     @allure.id("26")

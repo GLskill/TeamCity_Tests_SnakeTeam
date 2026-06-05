@@ -4,7 +4,6 @@ import pytest
 from src.api.classes.api_manager import ApiManager
 
 
-@pytest.mark.projects
 @pytest.mark.integration
 @pytest.mark.api
 class TestProjectIntegration:

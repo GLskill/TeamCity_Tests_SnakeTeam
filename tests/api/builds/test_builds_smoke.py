@@ -5,8 +5,6 @@ from src.api.classes.api_manager import ApiManager
 from src.enums import BuildState
 
 
-@pytest.mark.smoke
-@pytest.mark.builds
 @pytest.mark.api
 class TestBuildsSmoke:
     @allure.id("5.1")

@@ -5,8 +5,6 @@ from src.api.classes.api_manager import ApiManager
 from src.api.models.responses import AgentResponse
 
 
-@pytest.mark.smoke
-@pytest.mark.agents
 @pytest.mark.api
 class TestAgentsSmoke:
 

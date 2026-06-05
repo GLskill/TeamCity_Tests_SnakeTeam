@@ -7,7 +7,6 @@ from src.ui.pages.login_page import LoginPage
 
 
 @pytest.mark.ui
-@pytest.mark.users
 class TestUiAdminCreateUser:
 
     @allure.id("79")
