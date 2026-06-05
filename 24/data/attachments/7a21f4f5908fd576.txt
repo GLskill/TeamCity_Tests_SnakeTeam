@@ -1,0 +1,6 @@
+
+[CLEANUP] objects to clean: [UserResponse(id=47, username='qsqdagn', email=None, name=None), ProjectResponse(id='ProjectId_96d8', name='ProjectName_a37u', archived=None, parentProjectId='_Root'), ProjectResponse(id='CzYv4a56ebc6', name='czYv4a56ebc6', archived=None, parentProjectId='_Root')]
+[CLEANUP] Deleting project: ProjectId_96d8
+[CLEANUP] Deleted OK: ProjectId_96d8
+[CLEANUP] Deleting project: CzYv4a56ebc6
+[CLEANUP] Deleted OK: CzYv4a56ebc6
