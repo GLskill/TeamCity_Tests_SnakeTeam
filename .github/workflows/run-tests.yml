@@ -95,7 +95,6 @@ jobs:
             sleep 5
           done
 
-      # ── Запускаем pytest прямо на раннере ───────────────────────
       - name: Run Pytest
         env:
           ENV_FILE: .env

@@ -33,3 +33,4 @@ class TestAgentsSmoke:
     def test_get_agent_by_id(self, api_manager: ApiManager, authorized_agent: AgentResponse):
         agent = api_manager.agent_steps.get_agent_by_id(authorized_agent.id)
         assert agent.id == authorized_agent.id
+

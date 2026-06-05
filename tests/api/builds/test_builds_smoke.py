@@ -25,3 +25,4 @@ class TestBuildsSmoke:
         fetched_queued_build = api_manager.build_steps.get_queued_build_by_id(queued_build.id)
 
         assert fetched_queued_build.state == BuildState.QUEUED
+
