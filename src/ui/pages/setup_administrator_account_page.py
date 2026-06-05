@@ -68,7 +68,7 @@ class CreateAdministratorAccount(BasePage):
         return self.page.get_by_role("link", name="Login as Super user")
 
     def click_link_login_via_super_admin(self):
-        from infra.docker_compose.superadmin_page import LoginAsSuperAdmin
+        from src.ui.pages.superadmin_page import LoginAsSuperAdmin
         self.link_create_administrator_account.click()
         self.page.wait_for_load_state("networkidle")
         return LoginAsSuperAdmin(self.page)

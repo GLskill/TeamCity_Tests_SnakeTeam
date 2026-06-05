@@ -4,7 +4,7 @@ from typing import Optional
 
 from src.api.models.base_model import BaseModel
 from src.api.models.requests import (CreateProjectRequest, CreateBuildTypeRequest, QueueBuildRequest, CopyBuildTypeRequest,
-                                     CreateVcsRootRequest, BuildCancelRequest, RolesUpdateRequest, GroupsUpdateRequest,
+                                     CreateVcsRootRequest, BuildCancelRequest, RolesUpdateRequest,
                                      CreateUserRequest)
 from src.api.models.responses import (ServerInfoResponse, CurrentUserResponse, ProjectResponse, ProjectsListResponse,
                                       BuildTypeResponse, QueueBuildResponse, AgentsListResponse, VcsRootResponse,
@@ -98,12 +98,6 @@ class Endpoint(Enum):
         response_model=AgentResponse,
     )
 
-    COPY_BUILD_TYPE_TO_PROJECT = EndpointConfig(
-        url='projects',
-        request_model=CopyBuildTypeRequest,
-        response_model=BuildTypeResponse,
-    )
-
     GET_BUILD_TYPES_BY_PROJECT = EndpointConfig(
         url='buildTypes',
         request_model=None,
@@ -167,12 +161,6 @@ class Endpoint(Enum):
     GET_USER_GROUPS = EndpointConfig(
         url='users',
         request_model=None,
-        response_model=GroupsListResponse,
-    )
-
-    UPDATE_USER_GROUPS = EndpointConfig(
-        url='users',
-        request_model=GroupsUpdateRequest,
         response_model=GroupsListResponse,
     )
 

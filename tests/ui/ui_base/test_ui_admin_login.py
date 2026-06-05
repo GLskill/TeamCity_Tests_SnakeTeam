@@ -7,7 +7,6 @@ from src.ui.pages.login_page import LoginPage
 
 @pytest.mark.ui
 class TestLoginAdmin:
-
     @allure.id("51")
     @allure.title("UI — логин админа с корректными данными")
     def test_admin_login_with_correct_data(self, page: Page, ui_system_admin):
@@ -43,3 +42,5 @@ class TestLoginAdmin:
         LoginPage(page).open() \
             .admin_login_multiple_times(times=6) \
             .check_limit_auth_error()
+
+

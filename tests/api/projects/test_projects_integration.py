@@ -4,11 +4,10 @@ import pytest
 from src.api.classes.api_manager import ApiManager
 
 
-@pytest.mark.projects
 @pytest.mark.integration
 @pytest.mark.api
 class TestProjectIntegration:
-    @allure.id("20")  # запрос с жёсткими данными
+    @allure.id("20")
     @allure.title("POST /projects — создать проект с заданными атрибутами")
     def test_create_project_with_expected_attributes(self, api_manager: ApiManager, get_project_request):
         created = api_manager.project_steps.create_project(get_project_request)

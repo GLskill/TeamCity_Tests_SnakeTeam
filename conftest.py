@@ -20,3 +20,4 @@ def disable_all_agents_before_session():
         except Exception:
             pass
     yield
+

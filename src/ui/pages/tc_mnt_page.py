@@ -82,7 +82,7 @@ class MntStartedPage(BasePage):
         return self
 
     def accept_license_agreement(self):
-        from infra.docker_compose.setup_administrator_account_page import CreateAdministratorAccount
+        from src.ui.pages.setup_administrator_account_page import CreateAdministratorAccount
         self.check_license_agreement_page3_open()
         self.click_accept_license_button()
         return CreateAdministratorAccount(self.page)

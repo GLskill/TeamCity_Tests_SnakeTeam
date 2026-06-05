@@ -4,7 +4,6 @@ from src.enums import UserParams
 from src.api.classes.api_manager import ApiManager
 
 
-@pytest.mark.users
 @pytest.mark.integration
 @pytest.mark.api
 class TestUsersIntegration:

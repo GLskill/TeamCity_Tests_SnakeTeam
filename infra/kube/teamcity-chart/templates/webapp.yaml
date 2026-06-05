@@ -1,6 +1,4 @@
-# ── PersistentVolumeClaims ────────────────────────────────────────
-# В docker-compose были volumes — в K8s это PVC (постоянное хранилище).
-# Нужно два: для данных TeamCity и для логов.
+
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -24,9 +22,6 @@ spec:
       storage: {{ .Values.webapp.storage.logs }}
 ---
 
-# ── Deployment ────────────────────────────────────────────────────
-# В docker-compose был сервис webapp. В K8s — Deployment.
-# Монтируем оба PVC как в docker-compose (volumes).
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -49,7 +44,6 @@ spec:
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: {{ .Values.webapp.port }}
-          # Healthcheck: аналог docker-compose healthcheck
           readinessProbe:
             httpGet:
               path: /mnt
@@ -77,9 +71,6 @@ spec:
             claimName: teamcity-logs
 ---
 
-# ── Service ───────────────────────────────────────────────────────
-# ClusterIP — доступен внутри кластера по имени teamcity-server.
-# Аналог network teamcity-net в docker-compose.
 apiVersion: v1
 kind: Service
 metadata:

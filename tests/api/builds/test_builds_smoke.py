@@ -5,8 +5,6 @@ from src.api.classes.api_manager import ApiManager
 from src.enums import BuildState
 
 
-@pytest.mark.smoke
-@pytest.mark.builds
 @pytest.mark.api
 class TestBuildsSmoke:
     @allure.id("5.1")
@@ -25,3 +23,4 @@ class TestBuildsSmoke:
         fetched_queued_build = api_manager.build_steps.get_queued_build_by_id(queued_build.id)
 
         assert fetched_queued_build.state == BuildState.QUEUED
+
