@@ -41,6 +41,7 @@ services:
 
   setup:
     image: glskill/teamcity-tests-version1:latest
+    pull_policy: always
     container_name: teamcity-setup
     restart: "no"
     depends_on:
@@ -66,6 +67,7 @@ services:
 
   tests:
     image: glskill/teamcity-tests-version1:latest
+    pull_policy: always
     container_name: teamcity-tests
     depends_on:
       setup:

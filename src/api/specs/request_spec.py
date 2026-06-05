@@ -36,15 +36,6 @@ class RequestSpecs:
         return headers
 
     @staticmethod
-    def admin_basic_auth_headers() -> dict:
-        credentials = base64.b64encode(
-            f"{os.getenv('TC_ADMIN_USERNAME')}:{os.getenv('TC_ADMIN_PASSWORD')}".encode()
-        ).decode()
-        headers = RequestSpecs.default_req_headers()
-        headers['Authorization'] = f'Basic {credentials}'
-        return headers
-
-    @staticmethod
     def basic_auth_headers(username: str, password: str) -> dict:
         credentials = base64.b64encode(f"{username}:{password}".encode()).decode()
         headers = RequestSpecs.default_req_headers()

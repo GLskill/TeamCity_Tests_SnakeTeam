@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ENV_FILE="${ENV_FILE:-.env}"
+ENV_FILE="${ENV_FILE:-.env.local}"
 IMAGE_NAME="${IMAGE_NAME:-teamcity-tests-version1}"
 TAG="${TAG:-latest}"
 

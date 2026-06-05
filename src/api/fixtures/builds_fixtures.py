@@ -7,12 +7,6 @@ from src.api.models.requests import BuildCancelRequest, Agent, Comment
 from src.api.models.responses import QueueBuildResponse, BuildTypeResponse, AgentResponse
 from src.api.models.requests import CreateBuildTypeRequest, ProjectRef, QueueBuildRequest, BuildTypeRef, \
     CopyBuildTypeRequest
-from src.api.steps.build_steps import BuildSteps
-
-
-@pytest.fixture()
-def build_steps(admin_api_manager) -> BuildSteps:
-    return admin_api_manager.build_steps
 
 
 @pytest.fixture()

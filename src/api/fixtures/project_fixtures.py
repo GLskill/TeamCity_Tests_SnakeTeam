@@ -8,12 +8,6 @@ from src.api.requests.skeleton.endpoint import Endpoint
 from src.api.requests.skeleton.requesters.crud_requester import CrudRequester
 from src.api.specs.request_spec import RequestSpecs
 from src.api.specs.response_spec import ResponseSpecs
-from src.api.steps.project_steps import ProjectSteps
-
-
-@pytest.fixture()
-def project_steps(admin_api_manager) -> ProjectSteps:
-    return admin_api_manager.project_steps
 
 
 @pytest.fixture()
