@@ -58,10 +58,35 @@ jobs:
           pip install -r requirements.txt
           playwright install --with-deps chromium firefox
 
-      # 2. Поднимаем окружение (Server + Agent + Setup)
-      - name: Start environment
-        run: docker compose -f $COMPOSE_FILE up -d --wait webapp agent setup
-        timeout-minutes: 15
+      # 2. Запускаем сервер и агента
+      - name: Start TeamCity Server and Agent
+        run: docker compose -f $COMPOSE_FILE up -d webapp agent
+
+      # 3. Ждём пока TeamCity Server полностью поднимется
+      - name: Wait for TeamCity Server
+        run: |
+          for i in {1..60}; do
+            if curl -sf http://localhost:8111/mnt -o /dev/null; then
+              echo "TeamCity is ready!"; break
+            fi
+            echo "Waiting... ($i/60)"; sleep 5
+          done
+          curl -sf http://localhost:8111/mnt -o /dev/null || (echo "TeamCity not ready!" && exit 1)
+
+      # 4. Запускаем setup (блокирует пока не завершится)
+      - name: Run Setup
+        run: docker compose -f $COMPOSE_FILE up setup
+        timeout-minutes: 10
+
+      # 5. Ждём авторизации агента
+      - name: Wait for Agent
+        run: |
+          for i in {1..24}; do
+            if docker inspect --format='{{.State.Health.Status}}' teamcity-agent-instance 2>/dev/null | grep -q healthy; then
+              echo "Agent is ready!"; break
+            fi
+            sleep 5
+          done
 
       # 3. Запускаем тесты
       - name: Run tests
