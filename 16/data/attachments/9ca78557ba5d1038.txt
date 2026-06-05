@@ -1,0 +1,4 @@
+
+[CLEANUP] objects to clean: [ProjectResponse(id='ProjectId_j7h9', name='ProjectName_ffz2', archived=None, parentProjectId='_Root')]
+[CLEANUP] Deleting project: ProjectId_j7h9
+[CLEANUP] Deleted OK: ProjectId_j7h9
