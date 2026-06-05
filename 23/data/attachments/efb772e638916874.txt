@@ -1,0 +1,4 @@
+
+[CLEANUP] objects to clean: [ProjectResponse(id='ProjectId_uzjp', name='ProjectName_1dsb', archived=None, parentProjectId='_Root'), BuildTypeResponse(id='BuildTypeId_vkzr', name='BuildTypeName_zyyo', project={'id': 'ProjectId_uzjp', 'name': 'ProjectName_1dsb', 'parentProjectId': '_Root', 'href': '/app/rest/projects/id:ProjectId_uzjp', 'webUrl': 'http://localhost:8111/project.html?projectId=ProjectId_uzjp'}, paused=None)]
+[CLEANUP] Deleting project: ProjectId_uzjp
+[CLEANUP] Deleted OK: ProjectId_uzjp
