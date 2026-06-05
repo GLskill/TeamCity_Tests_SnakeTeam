@@ -42,3 +42,5 @@ class TestLoginAdmin:
         LoginPage(page).open() \
             .admin_login_multiple_times(times=6) \
             .check_limit_auth_error()
+
+

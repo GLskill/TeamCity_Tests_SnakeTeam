@@ -45,3 +45,5 @@ class TestUiAdminCreateUser:
             .open() \
             .user_login_with_correct_data(user.username, password) \
             .check_welcome_or_favorite()
+
+

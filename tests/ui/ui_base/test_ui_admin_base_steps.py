@@ -53,3 +53,5 @@ class TestLoginAdmin:
         ProjectPanel(auth_as_system_admin) \
             .click_switch_to_administration() \
             .check_administration_page()
+
+

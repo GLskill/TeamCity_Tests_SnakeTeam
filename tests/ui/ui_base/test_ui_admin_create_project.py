@@ -54,3 +54,5 @@ class TestUICreateProject:
 
         assert project.id == project_id
         assert project.name == project_name
+
+

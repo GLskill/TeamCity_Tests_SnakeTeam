@@ -4,13 +4,32 @@ on:
   push:
     paths:
       - 'src/**'
+      - 'tests/**'
   pull_request:
     paths:
       - 'src/**'
+      - 'tests/**'
   workflow_dispatch:
+    inputs:
+      suite:
+        description: "Which suite to run"
+        required: false
+        type: choice
+        options:
+          - all
+          - api
+          - ui
+        default: all
+      markers:
+        description: "Additional pytest markers"
+        required: false
+        default: ""
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  COMPOSE_FILE: infra/docker_compose/docker-compose.yml
+  UI_BASE_URL: http://localhost:8111
+  baseurl: http://localhost:8111/app/rest/
 
 jobs:
   run-tests:
@@ -22,42 +41,94 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Start environment and run tests
-        run: |
-          docker compose -f infra/docker_compose/docker-compose.yml up -d --wait
-        timeout-minutes: 50
-
-      - name: Show test logs
-        if: always()
-        run: |
-          docker compose -f infra/docker_compose/docker-compose.yml logs tests
-
-      - name: Check test result
-        run: |
-          EXIT_CODE=$(docker inspect teamcity-tests --format='{{.State.ExitCode}}')
-          echo "pytest exit code: $EXIT_CODE"
-
-          # Парсим результаты из логов и пишем в Summary
-          LOGS=$(docker compose -f infra/docker_compose/docker-compose.yml logs tests 2>/dev/null)
-          SUMMARY=$(echo "$LOGS" | grep -E "passed|failed|error" | tail -1 | sed 's/.*| //')
-
-          echo "## 🧪 Test Results" >> $GITHUB_STEP_SUMMARY
-          if [ "$EXIT_CODE" -eq 0 ]; then
-            echo "### ✅ $SUMMARY" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "### ❌ $SUMMARY" >> $GITHUB_STEP_SUMMARY
-          fi
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "📦 Allure report available in **Artifacts** section below" >> $GITHUB_STEP_SUMMARY
-
-          exit "$EXIT_CODE"
-
-      - name: Publish test results
-        uses: EnricoMi/publish-test-results-action@v2
-        if: always()
+      # ── Python + зависимости на раннере ─────────────────────────
+      - uses: actions/setup-python@v5
         with:
-          files: test-results/results.xml
+          python-version: '3.11'
 
+      - uses: actions/cache@v5
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: ${{ runner.os }}-pip-
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          playwright install --with-deps chromium firefox
+
+      # ── Запускаем только инфраструктуру (без tests контейнера) ──
+      - name: Start TeamCity infrastructure
+        run: |
+          docker compose -f $COMPOSE_FILE up -d webapp agent
+        timeout-minutes: 5
+
+      - name: Wait for TeamCity Server
+        run: |
+          echo "Waiting for TeamCity Server..."
+          for i in {1..60}; do
+            if curl -sf http://localhost:8111/mnt -o /dev/null; then
+              echo "TeamCity is ready!"
+              break
+            fi
+            echo "Attempt $i/60, waiting..."
+            sleep 5
+          done
+          curl -sf http://localhost:8111/mnt -o /dev/null || (echo "TeamCity not ready!" && exit 1)
+
+      - name: Run TeamCity Setup
+        run: |
+          docker compose -f $COMPOSE_FILE up setup
+        timeout-minutes: 10
+
+      - name: Wait for Agent
+        run: |
+          echo "Waiting for agent to be authorized..."
+          for i in {1..24}; do
+            if docker inspect --format='{{.State.Health.Status}}' teamcity-agent-instance | grep -q healthy; then
+              echo "Agent is healthy!"
+              break
+            fi
+            sleep 5
+          done
+
+      # ── Запускаем pytest прямо на раннере ───────────────────────
+      - name: Run Pytest
+        env:
+          ENV_FILE: .env
+          PYTHONPATH: .
+        run: |
+          set -eux
+
+          SUITE="${{ inputs.suite }}"
+          MARKERS="${{ inputs.markers }}"
+
+          OPTS=""
+          [ -n "$MARKERS" ] && OPTS="-m $MARKERS"
+
+          if [ "$SUITE" = "api" ]; then
+            pytest tests/ -m api $OPTS -v
+          elif [ "$SUITE" = "ui" ]; then
+            pytest tests/ -m ui $OPTS -v
+          else
+            pytest tests/ $OPTS -v
+          fi
+
+      # ── Summary ─────────────────────────────────────────────────
+      - name: Write Summary
+        if: always()
+        run: |
+          echo "## 🧪 TeamCity Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "📊 Allure report: https://glskill.github.io/TeamCity_Tests_SnakeTeam/${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+
+      # ── Останавливаем инфраструктуру ────────────────────────────
+      - name: Stop environment
+        if: always()
+        run: |
+          docker compose -f $COMPOSE_FILE down -v
+
+      # ── Allure отчёт на GitHub Pages ────────────────────────────
       - name: Load Allure history
         uses: actions/checkout@v5
         if: always()
@@ -83,16 +154,3 @@ jobs:
           publish_branch: gh-pages
           publish_dir: allure-history
           keep_files: true
-
-      - name: Upload Allure report as artifact
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: allure-report-${{ github.run_number }}
-          path: allure-history
-          retention-days: 30
-
-      - name: Stop environment
-        if: always()
-        run: |
-          docker compose -f infra/docker_compose/docker-compose.yml down -v
