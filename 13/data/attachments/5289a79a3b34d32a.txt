@@ -1,0 +1,4 @@
+
+[CLEANUP] objects to clean: [ProjectResponse(id='ProjectId_jku8', name='ProjectName_6eft', archived=None, parentProjectId='_Root'), BuildTypeResponse(id='BuildTypeId_agkn', name='BuildTypeName_r5k9', project={'id': 'ProjectId_jku8', 'name': 'ProjectName_6eft', 'parentProjectId': '_Root', 'href': '/app/rest/projects/id:ProjectId_jku8', 'webUrl': 'http://localhost:8111/project.html?projectId=ProjectId_jku8'}, paused=None), AgentResponse(id=1, name='teamcity-agent-instance', connected=None, enabled=None, authorized=None)]
+[CLEANUP] Deleting project: ProjectId_jku8
+[CLEANUP] Deleted OK: ProjectId_jku8
