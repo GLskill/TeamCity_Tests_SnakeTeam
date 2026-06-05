@@ -15,7 +15,7 @@ from requests import Response
 class AdminUserSteps(BaseSteps):
     def admin_create_user(self, create_user_request: CreateUserRequest) -> UserResponse:
         user: UserResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.CREATE_USER,
             ResponseSpecs.request_return_ok(),
         ).post(create_user_request)
@@ -24,14 +24,14 @@ class AdminUserSteps(BaseSteps):
 
     def admin_create_invalid_user(self, create_user_request: CreateUserRequest, error_key: str, error_value: str):
         CrudRequester(
-            request_spec=RequestSpecs.admin_base_headers(),
+            request_spec=self.headers,
             endpoint=Endpoint.CREATE_USER,
             response_spec=ResponseSpecs.request_return_bad_request(error_key, error_value),
         ).post(create_user_request)
 
     def admin_get_all_users(self) -> list:
         users: UsersListResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_USERS,
             ResponseSpecs.request_return_ok(),
         ).get()
@@ -39,7 +39,7 @@ class AdminUserSteps(BaseSteps):
 
     def admin_get_user_by_id(self, user_id: int) -> UserResponse:
         user: UserResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_USER,
             ResponseSpecs.request_return_ok(),
         ).get(locator=f'id:{user_id}')
@@ -48,7 +48,7 @@ class AdminUserSteps(BaseSteps):
 
     def admin_get_user_by_username(self, username: str) -> UserResponse:
         user: UserResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_USER,
             ResponseSpecs.request_return_ok(),
         ).get(locator=f'username:{username}')
@@ -57,7 +57,7 @@ class AdminUserSteps(BaseSteps):
 
     def admin_get_current_user(self) -> CurrentUserResponse:
         current: CurrentUserResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_CURRENT_USER,
             ResponseSpecs.request_return_ok(),
         ).get()
@@ -65,7 +65,7 @@ class AdminUserSteps(BaseSteps):
 
     def admin_delete_user(self, user_id: int) -> None:
         ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.DELETE_USER,
             ResponseSpecs.entity_was_deleted(),
         ).delete(locator=f'id:{user_id}')
@@ -76,21 +76,21 @@ class AdminUserSteps(BaseSteps):
 
     def admin_get_deleted_user(self, user_id: int) -> None:
         CrudRequester(
-            request_spec=RequestSpecs.admin_base_headers(),
+            request_spec=self.headers,
             endpoint=Endpoint.GET_USER,
             response_spec=ResponseSpecs.entity_was_not_found(),
         ).get(locator=f'id:{user_id}')
 
     def admin_get_deleted_user_by_username(self, username: str) -> None:
         CrudRequester(
-            request_spec=RequestSpecs.admin_base_headers(),
+            request_spec=self.headers,
             endpoint=Endpoint.GET_USER,
             response_spec=ResponseSpecs.entity_was_not_found(),
         ).get(locator=f'username:{username}')
 
     def admin_get_user_groups(self, user_id: int) -> list:
         groups: GroupsListResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_USER_GROUPS,
             ResponseSpecs.request_return_ok(),
         ).get(locator=f'id:{user_id}/groups')
@@ -98,14 +98,14 @@ class AdminUserSteps(BaseSteps):
 
     def admin_remove_user_from_group(self, user_id: int, group_locator: str) -> None:
         ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.DELETE_USER_FROM_GROUP,
             ResponseSpecs.entity_was_deleted(),
         ).delete(locator=f'id:{user_id}/groups/{group_locator}')
 
     def admin_get_user_roles(self, user_id: int) -> list:
         roles: RolesListResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_USER_ROLES,
             ResponseSpecs.request_return_ok(),
         ).get(locator=f'id:{user_id}/roles')
@@ -113,14 +113,14 @@ class AdminUserSteps(BaseSteps):
 
     def admin_remove_user_role(self, user_id: int, role_id: str, scope: str) -> None:
         ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.DELETE_USER_ROLE,
             ResponseSpecs.entity_was_deleted(),
         ).delete(locator=f'id:{user_id}/roles/{role_id}/{scope}')
 
     def admin_get_user_tokens(self, user_id: int) -> list:
         tokens: TokensListResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_USER_TOKENS,
             ResponseSpecs.request_return_ok(),
         ).get(locator=f'id:{user_id}/tokens')
@@ -128,7 +128,7 @@ class AdminUserSteps(BaseSteps):
 
     def admin_create_user_token(self, user_id: int, token_name: str) -> TokenResponse:
         token: TokenResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.CREATE_USER_TOKEN,
             ResponseSpecs.request_return_ok(),
         ).post(locator=f'id:{user_id}/tokens/{token_name}')
@@ -136,21 +136,21 @@ class AdminUserSteps(BaseSteps):
 
     def admin_create_user_token_raw(self, user_id: int, token_name: str) -> Response:
         return CrudRequester(
-            request_spec=RequestSpecs.admin_base_headers(),
+            request_spec=self.headers,
             endpoint=Endpoint.CREATE_USER_TOKEN,
             response_spec=lambda r: r,
         ).post(model=None, locator=f'id:{user_id}/tokens/{token_name}')
 
     def admin_delete_user_token(self, user_id: int, token_name: str) -> None:
         ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.DELETE_USER_TOKEN,
             ResponseSpecs.entity_was_deleted(),
         ).delete(locator=f'id:{user_id}/tokens/{token_name}')
 
     def admin_delete_user_token_raw(self, user_id: int, token_name: str) -> Response:
         return CrudRequester(
-            request_spec=RequestSpecs.admin_base_headers(),
+            request_spec=self.headers,
             endpoint=Endpoint.DELETE_USER_TOKEN,
             response_spec=lambda r: r,
         ).delete(locator=f'id:{user_id}/tokens/{token_name}')

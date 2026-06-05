@@ -9,8 +9,8 @@ class TestServerSmoke:
 
     @allure.id("1")
     @allure.title("GET /server — HTTP 200, поле version присутствует")
-    def test_get_server_info(self, api_manager: ApiManager):
-        server_info = api_manager.server_steps.get_server_info()
+    def test_get_server_info(self, admin_api_manager: ApiManager):
+        server_info = admin_api_manager.server_steps.get_server_info()
 
         assert server_info.version is not None
         assert server_info.buildDate is not None
@@ -18,6 +18,6 @@ class TestServerSmoke:
 
     @allure.id("2.1")  # отсутствует токен авторизации
     @allure.title("GET /users/current — HTTP 401, отсутсвтует или не верный токен")
-    def test_get_current_user_unauthorized(self, api_manager: ApiManager):
-        api_manager.server_steps.get_current_user_unauthorized()
+    def test_get_current_user_unauthorized(self, admin_api_manager: ApiManager):
+        admin_api_manager.server_steps.get_current_user_unauthorized()
 

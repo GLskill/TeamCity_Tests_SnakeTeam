@@ -10,7 +10,7 @@ from src.api.steps.base_steps import BaseSteps
 class ServerSteps(BaseSteps):
     def get_server_info(self) -> ServerInfoResponse:
         server_info: ServerInfoResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_SERVER_INFO,
             ResponseSpecs.request_return_ok(),
         ).get()
@@ -20,7 +20,7 @@ class ServerSteps(BaseSteps):
 
     def get_current_user(self) -> CurrentUserResponse:
         user: CurrentUserResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_CURRENT_USER,
             ResponseSpecs.request_return_ok(),
         ).get()

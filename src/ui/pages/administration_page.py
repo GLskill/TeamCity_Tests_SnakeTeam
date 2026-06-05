@@ -30,6 +30,7 @@ class AdminPanel(BasePage):
             try:
                 expect(self.users_tab).to_be_visible(timeout=10000)
                 self.users_tab.click()
+                self.page.wait_for_load_state("networkidle")
                 return UsersPage(self.page)
             except AssertionError:
                 return UsersPage(self.page).open()

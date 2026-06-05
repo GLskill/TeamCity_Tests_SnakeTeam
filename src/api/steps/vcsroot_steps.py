@@ -12,7 +12,7 @@ class VcsRootSteps(BaseSteps):
 
     def create_vcs_root(self, create_vcs_root_request: CreateVcsRootRequest) -> VcsRootResponse:
         vcs_root: VcsRootResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.CREATE_VCS_ROOT,
             ResponseSpecs.request_return_ok(),
         ).post(create_vcs_root_request)
@@ -21,7 +21,7 @@ class VcsRootSteps(BaseSteps):
 
     def get_vcs_root_by_id(self, vcs_root_id: str) -> VcsRootResponse:
         vcs_root: VcsRootResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_VCS_ROOT,
             ResponseSpecs.request_return_ok(),
         ).get(locator=f'id:{vcs_root_id}')
@@ -31,14 +31,14 @@ class VcsRootSteps(BaseSteps):
 
     def delete_vcs_root(self, vcs_root_id: str) -> None:
         ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.DELETE_VCS_ROOT,
             ResponseSpecs.entity_was_deleted(),
         ).delete(locator=f'id:{vcs_root_id}')
 
     def get_deleted_vcs_root(self, vcs_root_id: str):
         CrudRequester(
-            request_spec=RequestSpecs.admin_base_headers(),
+            request_spec=self.headers,
             endpoint=Endpoint.GET_VCS_ROOT,
             response_spec=ResponseSpecs.entity_was_not_found(),
         ).get(locator=f'id:{vcs_root_id}')

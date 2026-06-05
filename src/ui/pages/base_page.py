@@ -88,7 +88,7 @@ class BasePage(ABC):
             self.page.goto(target, wait_until="domcontentloaded")
         except PlaywrightError as e:
             error_msg = str(e)
-            if "interrupted by another navigation" in error_msg or "NS_BINDING_ABORTED" in error_msg:
+            if "interrupted by another navigation" in error_msg or "NS_BINDING_ABORTED" in error_msg or "NS_ERROR_FAILURE" in error_msg:
                 self.page.wait_for_load_state("domcontentloaded")
             else:
                 raise

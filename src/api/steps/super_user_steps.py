@@ -8,20 +8,24 @@ from src.api.steps.base_steps import BaseSteps
 
 
 class SuperUserSteps(BaseSteps):
+    def __init__(self, created_objects: list = None, headers: dict = None):
+        super().__init__(
+            created_objects,
+            headers if headers is not None else RequestSpecs.super_user_headers(),
+        )
+
     def create_system_admin(self, create_user_request: CreateUserRequest) -> UserResponse:
-        # Шаг 1: создаём пользователя
         user: UserResponse = ValidatedCrudRequester(
-            RequestSpecs.super_user_headers(),
+            self.headers,
             Endpoint.CREATE_USER,
             ResponseSpecs.request_return_ok(),
         ).post(create_user_request)
 
-        # Шаг 2: назначаем роль SYSTEM_ADMIN глобально
         roles_payload = RolesUpdateRequest(
             role=[RoleRef(roleId="SYSTEM_ADMIN", scope="g")]
         )
         ValidatedCrudRequester(
-            RequestSpecs.super_user_headers(),
+            self.headers,
             Endpoint.UPDATE_USER_ROLES,
             ResponseSpecs.request_return_ok(),
         ).put(f'id:{user.id}/roles', roles_payload)
@@ -30,7 +34,7 @@ class SuperUserSteps(BaseSteps):
 
     def delete_system_admin(self, user_id: int) -> None:
         ValidatedCrudRequester(
-            RequestSpecs.super_user_headers(),
+            self.headers,
             Endpoint.DELETE_USER,
             ResponseSpecs.entity_was_deleted(),
         ).delete(f'id:{user_id}')

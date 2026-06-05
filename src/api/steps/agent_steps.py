@@ -9,7 +9,7 @@ from src.api.steps.base_steps import BaseSteps
 class AgentSteps(BaseSteps):
     def get_enabled_agents(self) -> AgentsListResponse:
         agents: AgentsListResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_LIST_AGENTS,
             ResponseSpecs.request_return_ok(),
         ).get(params={'locator': 'enabled:true'})
@@ -18,7 +18,7 @@ class AgentSteps(BaseSteps):
 
     def get_disabled_agents(self) -> AgentsListResponse:
         agents: AgentsListResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_LIST_AGENTS,
             ResponseSpecs.request_return_ok(),
         ).get(params={'locator': 'enabled:false'})
@@ -27,7 +27,7 @@ class AgentSteps(BaseSteps):
 
     def get_unauthorized_agents(self) -> AgentsListResponse:
         agents: AgentsListResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_LIST_AGENTS,
             ResponseSpecs.request_return_ok(),
         ).get(params={'locator': 'authorized:false'})
@@ -36,7 +36,7 @@ class AgentSteps(BaseSteps):
 
     def get_agent_by_id(self, locator: int):
         agent: AgentResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_AGENT,
             ResponseSpecs.request_return_ok(),
         ).get(locator=f'id:{locator}')
@@ -45,7 +45,7 @@ class AgentSteps(BaseSteps):
 
     def enable_agent(self, agent_response: AgentResponse) -> None:
         ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_AGENT,
             ResponseSpecs.request_return_ok(),
         ).put(locator=f'id:{agent_response.id}/enabled', body='true')
@@ -53,7 +53,7 @@ class AgentSteps(BaseSteps):
 
     def disable_agent(self, agent_response: AgentResponse) -> None:
         ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_AGENT,
             ResponseSpecs.request_return_ok(),
         ).put(locator=f'id:{agent_response.id}/enabled', body='false')
@@ -61,7 +61,7 @@ class AgentSteps(BaseSteps):
     def authorize_agent(self, agent_response: AgentResponse) -> None:
         """Авторизует агента. После теста нужно вызвать deauthorize_agent."""
         ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_AGENT,
             ResponseSpecs.request_return_ok(),
         ).put(locator=f'id:{agent_response.id}/authorized', body='true')
@@ -69,14 +69,14 @@ class AgentSteps(BaseSteps):
     def deauthorize_agent(self, agent_response: AgentResponse) -> None:
         """Снимает авторизацию агента — возвращает окружение в исходное состояние."""
         ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_AGENT,
             ResponseSpecs.request_return_ok(),
         ).put(locator=f'id:{agent_response.id}/authorized', body='false')
 
     def get_authorized_agents(self) -> AgentsListResponse:
         agents: AgentsListResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_LIST_AGENTS,
             ResponseSpecs.request_return_ok(),
         ).get(params={'locator': 'authorized:true'})
@@ -84,7 +84,7 @@ class AgentSteps(BaseSteps):
 
     def get_connected_authorized_agents(self) -> AgentsListResponse:
         agents: AgentsListResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_LIST_AGENTS,
             ResponseSpecs.request_return_ok(),
         ).get(params={'locator': 'authorized:true,connected:true'})

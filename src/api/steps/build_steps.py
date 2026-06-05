@@ -19,7 +19,7 @@ class BuildSteps(BaseSteps):
 
     def create_build_type(self, create_build_type_request: CreateBuildTypeRequest) -> BuildTypeResponse:
         build_type: BuildTypeResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.CREATE_BUILD_TYPE,
             ResponseSpecs.request_return_ok(),
         ).post(create_build_type_request)
@@ -41,13 +41,13 @@ class BuildSteps(BaseSteps):
                     ]
                 },
             },
-            headers=RequestSpecs.admin_base_headers(),
+            headers=self.headers,
         )
         ResponseSpecs.request_return_ok()(response)
 
     def delete_build_type(self, build_type_id: str) -> None:
         ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.DELETE_BUILD_TYPE,
             ResponseSpecs.entity_was_deleted(),
         ).delete(locator=f'id:{build_type_id}')
@@ -58,14 +58,14 @@ class BuildSteps(BaseSteps):
 
     def get_deleted_build_type(self, build_type_id: str):
         CrudRequester(
-            request_spec=RequestSpecs.admin_base_headers(),
+            request_spec=self.headers,
             endpoint=Endpoint.GET_BUILD_TYPE,
             response_spec=ResponseSpecs.entity_was_not_found(),
         ).get(locator=build_type_id)
 
     def get_build_type_by_id(self, build_type_id: str) -> BuildTypeResponse:
         build_type: BuildTypeResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_BUILD_TYPE,
             ResponseSpecs.request_return_ok(),
         ).get(locator=build_type_id)
@@ -75,7 +75,7 @@ class BuildSteps(BaseSteps):
 
     def get_build_type_paused(self, build_type_id: str) -> bool:
         response = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_BUILD_TYPE,
             ResponseSpecs.request_return_ok(),
         ).crud_requester.get(locator=f'{build_type_id}/paused', accept='text/plain')
@@ -83,14 +83,14 @@ class BuildSteps(BaseSteps):
 
     def set_build_type_paused(self, build_type_id: str, paused: bool) -> None:
         ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_BUILD_TYPE,
             ResponseSpecs.request_return_ok(),
         ).put(locator=f'{build_type_id}/paused', body=str(paused).lower())
 
     def get_build_type_parameter(self, build_type_id: str, param_name: str) -> dict:
         response = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_BUILD_TYPE,
             ResponseSpecs.request_return_ok(),
         ).crud_requester.get(locator=f'{build_type_id}/parameters/{param_name}')
@@ -98,21 +98,21 @@ class BuildSteps(BaseSteps):
 
     def set_build_type_parameter(self, build_type_id: str, param_name: str, value: str) -> None:
         ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_BUILD_TYPE,
             ResponseSpecs.request_return_ok(),
         ).put(locator=f'{build_type_id}/parameters/{param_name}', body=value)
 
     def delete_build_type_parameter(self, build_type_id: str, param_name: str) -> None:
         ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_BUILD_TYPE,
             ResponseSpecs.entity_was_deleted(),
         ).delete(locator=f'{build_type_id}/parameters/{param_name}')
 
     def copy_build_type_to_project(self, project_id: str, copy_request: CopyBuildTypeRequest) -> BuildTypeResponse:
         build_type: BuildTypeResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_PROJECT,
             ResponseSpecs.request_return_ok(),
         ).post(copy_request, locator=f'{project_id}/buildTypes')
@@ -121,7 +121,7 @@ class BuildSteps(BaseSteps):
 
     def add_build_to_queue(self, queue_build_request: QueueBuildRequest) -> QueueBuildResponse:
         queued_build: QueueBuildResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.QUEUE_BUILD,
             ResponseSpecs.request_return_ok(),
         ).post(queue_build_request)
@@ -131,7 +131,7 @@ class BuildSteps(BaseSteps):
 
     def get_queued_build_by_id(self, build_id: int) -> QueueBuildResponse:
         queued_build: QueueBuildResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_QUEUED_BUILD,
             ResponseSpecs.request_return_ok(),
         ).get(locator=str(build_id))
@@ -142,7 +142,7 @@ class BuildSteps(BaseSteps):
     def cancel_queued_build(self, build_queued_cancel_request: BuildCancelRequest, locator: str | int) \
             -> QueueBuildResponse:
         build_cancel_response: QueueBuildResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.CANCEL_QUEUED_BUILD,
             ResponseSpecs.request_return_ok()
         ).post(build_queued_cancel_request, locator)
@@ -169,7 +169,7 @@ class BuildSteps(BaseSteps):
         self.wait_for_running(int(locator))
 
         build_cancel_response: QueueBuildResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.CANCEL_RUNNING_BUILD,
             ResponseSpecs.request_return_ok()
         ).post(build_queued_cancel_request, locator)
@@ -180,14 +180,14 @@ class BuildSteps(BaseSteps):
 
     def move_build_type_to_project(self, build_type_id: str, target_project_id: str) -> None:
         ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.MOVE_BUILD_TYPE,
             ResponseSpecs.entity_was_deleted(),
         ).post(locator=f'id:{build_type_id}/move?targetProjectId={target_project_id}')
 
     def get_build_by_affected_project(self, project_id: str) -> BuildTypesListResponse:
         build_types: BuildTypesListResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_BUILD_TYPES_BY_PROJECT,
             ResponseSpecs.request_return_ok(),
         ).get(params={'locator': f'affectedProject:(id:{project_id})'})

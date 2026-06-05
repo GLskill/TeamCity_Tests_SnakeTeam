@@ -12,8 +12,8 @@ from src.api.steps.project_steps import ProjectSteps
 
 
 @pytest.fixture()
-def project_steps(api_manager) -> ProjectSteps:
-    return api_manager.project_steps
+def project_steps(admin_api_manager) -> ProjectSteps:
+    return admin_api_manager.project_steps
 
 
 @pytest.fixture()
@@ -23,8 +23,8 @@ def get_project_request():
 
 
 @pytest.fixture()
-def created_project(get_project_request, api_manager):
-    project = api_manager.project_steps.create_project(get_project_request)
+def created_project(get_project_request, admin_api_manager):
+    project = admin_api_manager.project_steps.create_project(get_project_request)
     return project
 
 
@@ -38,13 +38,13 @@ def project_not_found():
 
 
 @pytest.fixture()
-def archive_project(api_manager):
-    return api_manager.project_steps.archive_project
+def archive_project(admin_api_manager):
+    return admin_api_manager.project_steps.archive_project
 
 
 @pytest.fixture()
-def sub_project(api_manager, created_project):
-    return api_manager.project_steps.create_project(make_sub_project_request(created_project))
+def sub_project(admin_api_manager, created_project):
+    return admin_api_manager.project_steps.create_project(make_sub_project_request(created_project))
 
 
 @pytest.fixture()
@@ -53,7 +53,7 @@ def sub_project_request(created_project) -> CreateProjectRequest:
 
 
 @pytest.fixture()
-def target_project(api_manager, created_objects) -> ProjectResponse:
+def target_project(admin_api_manager, created_objects) -> ProjectResponse:
     project_data = RandomModelGenerator.generate(CreateProjectRequest)
-    project = api_manager.project_steps.create_project(project_data)
+    project = admin_api_manager.project_steps.create_project(project_data)
     return project

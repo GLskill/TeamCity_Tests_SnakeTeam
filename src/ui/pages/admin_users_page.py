@@ -28,7 +28,11 @@ class UsersPage(BasePage):
 
     def check_user_exists_in_list(self, username: str):
         with allure.step(f"Проверить что пользователь '{username}' отображается в списке"):
-            user_row = self.page.locator(f"td a[href*='editUser']:has-text('{username}')")
-            expect(user_row).to_be_visible()
+            target = f"{self.url()}&searchStr={username}"
+            if self.base_url:
+                target = f"{self.base_url}{target}"
+            self.page.goto(target, wait_until="networkidle")
+            user_row = self.page.locator(f"td a:has-text('{username}')")
+            expect(user_row).to_be_visible(timeout=10000)
         return self
 

@@ -14,7 +14,7 @@ from src.api.steps.base_steps import BaseSteps
 class ProjectSteps(BaseSteps):
     def get_projects(self) -> ProjectsListResponse:
         projects: ProjectsListResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_PROJECTS,
             ResponseSpecs.request_return_ok(),
         ).get()
@@ -24,7 +24,7 @@ class ProjectSteps(BaseSteps):
 
     def get_all_projects(self) -> ProjectsListResponse:
         projects: ProjectsListResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.GET_PROJECTS,
             ResponseSpecs.request_return_ok(),
         ).get()
@@ -42,7 +42,7 @@ class ProjectSteps(BaseSteps):
         for attempt in range(retries):
             try:
                 project: ProjectResponse = ValidatedCrudRequester(
-                    RequestSpecs.admin_base_headers(),
+                    self.headers,
                     Endpoint.GET_PROJECT,
                     ResponseSpecs.request_return_ok(),
                 ).get(locator=project_id)
@@ -60,7 +60,7 @@ class ProjectSteps(BaseSteps):
 
     def create_project(self, create_project_request: CreateProjectRequest) -> ProjectResponse:
         project: ProjectResponse = ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.CREATE_PROJECT,
             ResponseSpecs.request_return_ok(),
         ).post(create_project_request)
@@ -71,7 +71,7 @@ class ProjectSteps(BaseSteps):
 
     def delete_project(self, locator: str):
         ValidatedCrudRequester(
-            RequestSpecs.admin_base_headers(),
+            self.headers,
             Endpoint.DELETE_PROJECT,
             ResponseSpecs.entity_was_deleted(),
         ).delete(locator)
@@ -83,13 +83,13 @@ class ProjectSteps(BaseSteps):
 
     def get_deleted_project(self, locator: str):
         CrudRequester(
-            request_spec=RequestSpecs.admin_base_headers(),
+            request_spec=self.headers,
             endpoint=Endpoint.GET_PROJECTS,
             response_spec=ResponseSpecs.entity_was_not_found(),
         ).get(locator=locator)
 
     def archive_project(self, project_id: str, archived: bool):
-        headers = dict(RequestSpecs.admin_base_headers())
+        headers = dict(self.headers)
         headers["Content-Type"] = "text/plain"
         headers["Accept"] = "text/plain"
         response = http_requests.put(
